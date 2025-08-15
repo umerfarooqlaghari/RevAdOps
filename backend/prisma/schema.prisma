@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Content {
+  id        String   @id @default(cuid())
+  section   String   // homepage, about, contact, etc.
+  key       String   // hero_title, hero_subtitle, etc.
+  value     String   @db.Text
+  type      String   @default("text") // text, image, html
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([section, key])
+  @@map("content")
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  shortDesc   String?
+  icon        String?
+  image       String?
+  slug        String   @unique
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("services")
+}
+
+model BlogCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blogs Blog[]
+
+  @@map("blog_categories")
+}
+
+model Blog {
+  id          String        @id @default(cuid())
+  title       String
+  content     String        @db.Text
+  excerpt     String?
+  slug        String        @unique
+  featuredImage String?
+  isPublished Boolean       @default(false)
+  publishedAt DateTime?
+  tags        String[]
+  categoryId  String?
+  category    BlogCategory? @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("blogs")
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String?  @db.Text
+  source    String?  // landing_page, contact_form, etc.
+  status    String   @default("new") // new, contacted, converted, closed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("leads")
+}
+
+model Newsletter {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("newsletter")
+}
