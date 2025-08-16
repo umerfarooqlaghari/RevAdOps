@@ -50,13 +50,19 @@ const HeroSection = () => {
                   </p>
                 </div>
 
-                {/* Single CTA Button - ITAO Style */}
-                <div className="flex justify-center">
+                {/* Two CTA Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link
-                    href={slides[currentSlide].ctaLink}
+                    href="/consultation"
                     className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-md font-semibold transition-colors duration-200 inline-flex items-center gap-2"
                   >
-                    {slides[currentSlide].cta}
+                    Get a Free Consultation
+                  </Link>
+                  <Link
+                    href="/solutions"
+                    className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-md font-semibold transition-colors duration-200 inline-flex items-center gap-2"
+                  >
+                    Explore Our Solutions
                   </Link>
                 </div>
               </div>

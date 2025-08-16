@@ -1,11 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 
+interface HeaderContent {
+  logo?: string;
+  logo_alt?: string;
+  company_name?: string;
+}
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [headerContent, setHeaderContent] = useState<HeaderContent>({});
+
+  useEffect(() => {
+    fetchHeaderContent();
+  }, []);
+
+  const fetchHeaderContent = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content`);
+      if (response.ok) {
+        const data = await response.json();
+        setHeaderContent(data.header || {});
+      }
+    } catch (error) {
+      console.error('Failed to fetch header content:', error);
+    }
+  };
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -21,8 +44,8 @@ const Header = () => {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
             <img
-              src="/logo-placeholder.svg"
-              alt="RevAdOps Logo"
+              src={headerContent.logo || "/logo-placeholder.svg"}
+              alt={headerContent.logo_alt || "RevAdOps Logo"}
               className="h-10 w-auto"
             />
           </Link>

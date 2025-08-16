@@ -1,12 +1,44 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
+
+interface FooterContent {
+  logo?: string;
+  logo_alt?: string;
+  company_description?: string;
+  facebook_icon?: string;
+  facebook_link?: string;
+  twitter_icon?: string;
+  twitter_link?: string;
+  linkedin_icon?: string;
+  linkedin_link?: string;
+  instagram_icon?: string;
+  instagram_link?: string;
+  copyright_text?: string;
+}
 
 const Footer = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [footerContent, setFooterContent] = useState<FooterContent>({});
+
+  useEffect(() => {
+    fetchFooterContent();
+  }, []);
+
+  const fetchFooterContent = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content`);
+      if (response.ok) {
+        const data = await response.json();
+        setFooterContent(data.footer || {});
+      }
+    } catch (error) {
+      console.error('Failed to fetch footer content:', error);
+    }
+  };
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,11 +86,16 @@ const Footer = () => {
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center space-x-3">
               <img
-                src="/logo-placeholder.svg"
-                alt="RevAdOps Logo"
+                src={footerContent.logo || "/logo-placeholder.svg"}
+                alt={footerContent.logo_alt || "RevAdOps Logo"}
                 className="h-8 w-auto"
               />
             </Link>
+            {footerContent.company_description && (
+              <p className="text-gray-400 mt-4 max-w-md mx-auto">
+                {footerContent.company_description}
+              </p>
+            )}
           </div>
 
           {/* Bottom Section - ITAO Style */}

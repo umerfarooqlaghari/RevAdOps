@@ -11,7 +11,18 @@ export const authenticateToken = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+
+    // Handle hardcoded admin
+    if (decoded.userId === 'admin') {
+      req.user = {
+        id: 'admin',
+        email: 'admin@revadops.com',
+        name: 'RevAdOps Admin',
+        role: 'admin'
+      };
+      return next();
+    }
+
     // Verify user still exists
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },

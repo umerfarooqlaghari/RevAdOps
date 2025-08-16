@@ -119,19 +119,28 @@ router.put('/:section', authenticateToken, async (req, res) => {
   }
 });
 
-// Get all sections
+// Get all content organized by sections
 router.get('/', async (req, res) => {
   try {
-    const sections = await prisma.content.groupBy({
-      by: ['section'],
-      _count: {
-        section: true
-      }
+    const allContent = await prisma.content.findMany({
+      orderBy: [
+        { section: 'asc' },
+        { key: 'asc' }
+      ]
     });
 
-    res.json(sections);
+    // Organize content by sections
+    const contentBySections = allContent.reduce((acc, item) => {
+      if (!acc[item.section]) {
+        acc[item.section] = {};
+      }
+      acc[item.section][item.key] = item.value;
+      return acc;
+    }, {});
+
+    res.json(contentBySections);
   } catch (error) {
-    console.error('Get sections error:', error);
+    console.error('Get all content error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

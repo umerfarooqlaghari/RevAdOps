@@ -23,25 +23,25 @@ const FinalCTASection = () => {
           <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
             Start Maximizing Your Ad Revenue Today
           </h2>
-          
+
           {/* Subheadline */}
           <p className="text-lg md:text-xl mb-12 opacity-90 leading-relaxed max-w-3xl mx-auto">
-            Whether you're running a website, mobile app, or video platform, RevAdOps has 
+            Whether you're running a website, mobile app, or video platform, RevAdOps has
             the tools and expertise to take your monetization to the next level.
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-            <a 
-              href="/consultation" 
+            <a
+              href="/consultation"
               className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 inline-flex items-center justify-center gap-3 group hover:scale-105"
             >
               Get a Free Consultation
               <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
             </a>
-            
-            <a 
-              href="/contact" 
+
+            <a
+              href="/contact"
               className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 inline-flex items-center justify-center gap-3 group hover:scale-105"
             >
               <Mail className="h-5 w-5" />

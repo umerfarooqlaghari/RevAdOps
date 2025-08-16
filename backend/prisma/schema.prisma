@@ -27,12 +27,34 @@ model Content {
   section   String   // homepage, about, contact, etc.
   key       String   // hero_title, hero_subtitle, etc.
   value     String   @db.Text
-  type      String   @default("text") // text, image, html
+  type      String   @default("text") // text, image, video, json
+  metadata  Json?    // additional data like image dimensions, constraints, etc.
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([section, key])
   @@map("content")
+}
+
+model MediaAsset {
+  id            String   @id @default(cuid())
+  filename      String
+  originalName  String
+  mimeType      String
+  size          Int
+  width         Int?
+  height        Int?
+  cloudinaryId  String   @unique
+  cloudinaryUrl String
+  folder        String   @default("revadops")
+  tags          String[]
+  altText       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("media_assets")
 }
 
 model Service {

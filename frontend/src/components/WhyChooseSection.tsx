@@ -31,30 +31,44 @@ const WhyChooseSection = () => {
   ];
 
   return (
-    <section className="section-padding bg-white">
+    <section className="section-padding bg-gray-50">
       <div className="container-custom">
-        {/* Who We Are Section - ITAO Style */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Who we are
-            </h2>
-            <p className="text-gray-600 leading-relaxed">
-              RevAdOps is committed to delivering exceptional results through experienced hands.
-              We possess in-depth knowledge of the digital advertising landscape starting from ad
-              trafficking to campaign management through our Skilled experts in all aspects of ad
-              operations. When you choose RevAdOps, you gain access to a team that values
-              collaboration, creativity, and continuous learning. Together, we work diligently to
-              help you navigate the ever-evolving world of online advertising.
-            </p>
-          </div>
-          <div>
-            <img
-              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80"
-              alt="Who We Are"
-              className="w-full h-auto rounded-lg shadow-lg"
-            />
-          </div>
+        {/* Section Header */}
+        <div className="text-center max-w-4xl mx-auto mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            Data-Driven, Transparent, and Results-Oriented
+          </h2>
+          <p className="text-lg text-gray-600 leading-relaxed">
+            We believe in measurable results and clear communication. Our team combines over
+            a decade of AdTech expertise with powerful analytics tools to help you scale revenue
+            without compromising traffic quality or advertiser trust.
+          </p>
+        </div>
+
+        {/* Benefits Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+          {benefits.map((benefit, index) => {
+            const Icon = benefit.icon;
+            return (
+              <div
+                key={index}
+                className="bg-white rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300 group hover:-translate-y-1"
+              >
+                {/* Icon */}
+                <div className={`w-16 h-16 ${benefit.color} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                  <Icon className="h-8 w-8 text-white" />
+                </div>
+
+                {/* Content */}
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  {benefit.title}
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {benefit.description}
+                </p>
+              </div>
+            );
+          })}
         </div>
 
         {/* Ad Servers & Tools Expertise - ITAO Style */}

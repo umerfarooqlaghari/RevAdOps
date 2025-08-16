@@ -13,6 +13,7 @@ import blogRoutes from './routes/blog.js';
 import serviceRoutes from './routes/service.js';
 import leadRoutes from './routes/lead.js';
 import uploadRoutes from './routes/upload.js';
+import adminRoutes from './routes/admin.js';
 
 // Load environment variables
 dotenv.config();
@@ -54,11 +55,15 @@ app.use('/api/blogs', blogRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/admin', adminRoutes);
+
+// Serve static files for local uploads
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     message: 'Server is running',
     timestamp: new Date().toISOString()
   });
