@@ -275,37 +275,41 @@ export default function HomepageAdmin() {
     try {
       const token = localStorage.getItem('adminToken');
 
-      // Save each section separately using the content API
-      const savePromises: Promise<any>[] = [];
+      // Prepare updates for bulk update API
+      const updates: any[] = [];
 
       Object.entries(content).forEach(([section, items]) => {
-        const sectionContent: any = {};
         items.forEach(item => {
-          sectionContent[item.key] = {
+          updates.push({
+            section: section,
+            key: item.key,
             value: item.value,
-            type: item.type
-          };
+            type: item.type,
+            metadata: item.metadata || {},
+            order: item.order || 0
+          });
         });
-
-        savePromises.push(
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/content/${section}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify({ content: sectionContent }),
-          })
-        );
       });
 
-      const responses = await Promise.all(savePromises);
-      const allSuccessful = responses.every(response => response.ok);
+      // Use the existing bulk update API (PUT method)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/homepage/bulk`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ updates }),
+      });
 
-      if (allSuccessful) {
+      if (response.ok) {
         alert('Content saved successfully!');
+
+        // Refresh content to show updated values
+        await fetchHomepageContent();
       } else {
-        alert('Some content failed to save. Please try again.');
+        const errorData = await response.json();
+        console.error('Save error:', errorData);
+        alert('Failed to save content: ' + (errorData.message || 'Unknown error'));
       }
     } catch (error) {
       console.error('Save error:', error);

@@ -129,12 +129,19 @@ router.get('/', async (req, res) => {
       ]
     });
 
-    // Organize content by sections
+    // Organize content by sections, removing homepage_ prefix for homepage sections
     const contentBySections = allContent.reduce((acc, item) => {
-      if (!acc[item.section]) {
-        acc[item.section] = {};
+      let sectionName = item.section;
+
+      // Remove homepage_ prefix for homepage sections to match frontend expectations
+      if (sectionName.startsWith('homepage_')) {
+        sectionName = sectionName.replace('homepage_', '');
       }
-      acc[item.section][item.key] = item.value;
+
+      if (!acc[sectionName]) {
+        acc[sectionName] = {};
+      }
+      acc[sectionName][item.key] = item.value;
       return acc;
     }, {});
 
