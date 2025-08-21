@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import { CheckCircle, Users, Award, Clock } from 'lucide-react';
 
 interface WhyChooseContent {
@@ -87,9 +89,11 @@ const DynamicWhyChooseSection = ({ content }: DynamicWhyChooseSectionProps) => {
               <div key={index} className="text-center">
                 <div className={`w-16 h-16 ${reason.color} rounded-full flex items-center justify-center mb-6 mx-auto`}>
                   {isImageIcon ? (
-                    <img
+                    <Image
                       src={reason.icon as string}
                       alt={reason.title}
+                      width={32}
+                      height={32}
                       className="h-8 w-8 object-contain"
                     />
                   ) : (

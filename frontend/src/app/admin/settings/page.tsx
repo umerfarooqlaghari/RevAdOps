@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  Save, 
-  Key, 
-  Globe, 
-  Mail, 
+import {
+  Save,
+  Key,
+  Globe,
   Shield,
   Database,
   Palette,
@@ -34,14 +33,14 @@ export default function Settings() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       alert('Settings saved successfully!');
-    } catch (error) {
+    } catch {
       alert('Failed to save settings');
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleChange = (key: string, value: any) => {
+  const handleChange = (key: string, value: string | boolean) => {
     setSettings(prev => ({
       ...prev,
       [key]: value

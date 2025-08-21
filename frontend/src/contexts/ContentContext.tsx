@@ -2,8 +2,29 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+// Define the structure for content sections
+interface ContentSection {
+  [key: string]: string;
+}
+
+interface ContentData {
+  hero?: ContentSection;
+  what_we_do?: ContentSection;
+  why_choose_us?: ContentSection;
+  how_it_works?: ContentSection;
+  our_expertise?: ContentSection;
+  testimonials?: ContentSection;
+  partners?: ContentSection;
+  final_cta?: ContentSection;
+  services?: ContentSection;
+  blog?: ContentSection;
+  contact?: ContentSection;
+  consultation?: ContentSection;
+  [key: string]: ContentSection | undefined;
+}
+
 interface ContentContextType {
-  content: any;
+  content: ContentData;
   loading: boolean;
   error: string | null;
   refetchContent: () => Promise<void>;
@@ -24,7 +45,7 @@ interface ContentProviderProps {
 }
 
 export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) => {
-  const [content, setContent] = useState<any>({});
+  const [content, setContent] = useState<ContentData>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

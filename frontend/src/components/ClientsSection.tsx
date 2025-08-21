@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 const ClientsSection = () => {
   // Dummy client logos using company logo placeholders
   const clients = [
@@ -34,9 +36,11 @@ const ClientsSection = () => {
               key={client.id}
               className="flex items-center justify-center p-4 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100"
             >
-              <img
+              <Image
                 src={client.logo}
                 alt={client.name}
+                width={120}
+                height={48}
                 className="max-w-full h-auto max-h-12 object-contain"
               />
             </div>

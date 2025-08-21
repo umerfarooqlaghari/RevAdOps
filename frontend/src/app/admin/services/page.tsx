@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import Image from 'next/image';
 import { Save, Eye, Image as ImageIcon, Type, Video, Link, Hash, Clock } from 'lucide-react';
 
 interface ServicesContent {
@@ -16,7 +17,7 @@ interface ContentItem {
   key: string;
   value: string;
   type: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   order?: number;
 }
 
@@ -33,7 +34,7 @@ export default function ServicesAdminPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Default content structure for services
-  const defaultContent: ServicesContent = {
+  const defaultContent: ServicesContent = useMemo(() => ({
     services_hero: [
       { section: 'services_hero', key: 'title', value: 'Our Services', type: 'text', order: 1 },
       { section: 'services_hero', key: 'subtitle', value: 'Digital Marketing Solutions', type: 'text', order: 2 },
@@ -113,13 +114,9 @@ export default function ServicesAdminPage() {
       { section: 'services_cta', key: 'email', value: 'hello@revadops.com', type: 'text', order: 10 },
       { section: 'services_cta', key: 'features', value: 'Free Consultation, Custom Strategy, Proven Results', type: 'text', order: 11 },
     ],
-  };
+  }), []);
 
-  useEffect(() => {
-    fetchServicesContent();
-  }, []);
-
-  const fetchServicesContent = async () => {
+  const fetchServicesContent = useCallback(async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content`);
       const data = await response.json();
@@ -149,7 +146,11 @@ export default function ServicesAdminPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [defaultContent]);
+
+  useEffect(() => {
+    fetchServicesContent();
+  }, [fetchServicesContent]);
 
   const handleContentChange = (section: string, key: string, value: string) => {
     setContent(prev => ({
@@ -166,10 +167,10 @@ export default function ServicesAdminPage() {
       const token = localStorage.getItem('adminToken');
 
       // Prepare updates for bulk update API
-      const updates: any[] = [];
+      const updates: Array<{section: string; key: string; value: string; type: string; metadata?: Record<string, unknown>; order?: number}> = [];
 
       Object.entries(content).forEach(([section, items]) => {
-        items.forEach(item => {
+        items.forEach((item: ContentItem) => {
           updates.push({
             section: section,
             key: item.key,
@@ -297,7 +298,7 @@ export default function ServicesAdminPage() {
             </div>
 
             <div className="p-6 space-y-6">
-              {content[activeSection as keyof ServicesContent]?.map((item, index) => {
+              {content[activeSection as keyof ServicesContent]?.map((item) => {
                 const FieldIcon = getFieldIcon(item.type);
                 
                 return (
@@ -326,9 +327,11 @@ export default function ServicesAdminPage() {
                         />
                         {item.value && (
                           <div className="mt-2">
-                            <img
+                            <Image
                               src={item.value}
                               alt="Preview"
+                              width={200}
+                              height={128}
                               className="max-w-xs h-32 object-cover rounded-md border border-gray-200"
                               onError={(e) => {
                                 e.currentTarget.style.display = 'none';

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import Image from 'next/image';
+
 
 const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -29,10 +30,12 @@ const HeroSection = () => {
     <section className="relative min-h-screen bg-white">
       {/* Hero Banner Image - ITAO Style */}
       <div className="relative h-screen">
-        <img
+        <Image
           src={slides[currentSlide].image}
           alt="Hero Banner"
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
+          priority
         />
         <div className="absolute inset-0 bg-black bg-opacity-40"></div>
 

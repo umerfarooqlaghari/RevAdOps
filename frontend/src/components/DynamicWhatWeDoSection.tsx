@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import { TrendingUp, Target, BarChart3, Shield } from 'lucide-react';
 
 interface WhatWeDoContent {
@@ -94,9 +96,11 @@ const DynamicWhatWeDoSection = ({ content }: DynamicWhatWeDoSectionProps) => {
               >
                 <div className={`w-16 h-16 ${service.color} rounded-lg flex items-center justify-center mb-6 mx-auto`}>
                   {isImageIcon ? (
-                    <img
+                    <Image
                       src={service.icon as string}
                       alt={service.title}
+                      width={32}
+                      height={32}
                       className="h-8 w-8 object-contain"
                     />
                   ) : (

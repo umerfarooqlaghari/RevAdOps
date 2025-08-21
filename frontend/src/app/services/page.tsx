@@ -7,16 +7,26 @@ import DynamicServicesProcessSection from '@/components/DynamicServicesProcessSe
 import DynamicServicesCTASection from '@/components/DynamicServicesCTASection';
 import { useState, useEffect } from 'react';
 
+interface ContentSection {
+  [key: string]: string;
+}
+
 interface ServicesContent {
-  hero: any;
-  services_list: any;
-  features: any;
-  process: any;
-  cta: any;
+  hero: ContentSection;
+  services_list: ContentSection;
+  features: ContentSection;
+  process: ContentSection;
+  cta: ContentSection;
 }
 
 export default function ServicesPage() {
-  const [content, setContent] = useState<any>({});
+  const [content, setContent] = useState<ServicesContent>({
+    hero: {},
+    services_list: {},
+    features: {},
+    process: {},
+    cta: {}
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

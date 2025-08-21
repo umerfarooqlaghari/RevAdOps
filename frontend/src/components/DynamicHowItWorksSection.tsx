@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 interface HowItWorksContent {
   title?: string;
   description?: string;
@@ -81,9 +83,11 @@ const DynamicHowItWorksSection = ({ content }: DynamicHowItWorksSectionProps) =>
             <div key={index} className="text-center">
               <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold mb-6 mx-auto">
                 {step.icon ? (
-                  <img
+                  <Image
                     src={step.icon}
                     alt={step.title}
+                    width={32}
+                    height={32}
                     className="h-8 w-8 object-contain"
                   />
                 ) : (

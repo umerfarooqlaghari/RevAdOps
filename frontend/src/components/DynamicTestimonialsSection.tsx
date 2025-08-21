@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 interface TestimonialsContent {
   title?: string;
   description?: string;
@@ -82,21 +84,25 @@ const DynamicTestimonialsSection = ({ content }: DynamicTestimonialsSectionProps
             <div key={index} className="bg-white rounded-xl p-8 shadow-lg">
               {testimonial.logo && (
                 <div className="mb-4">
-                  <img
+                  <Image
                     src={testimonial.logo}
                     alt={`${testimonial.company} logo`}
+                    width={120}
+                    height={32}
                     className="h-8 object-contain"
                   />
                 </div>
               )}
               <p className="text-gray-600 mb-6 italic">
-                "{testimonial.text}"
+                &ldquo;{testimonial.text}&rdquo;
               </p>
               <div className="flex items-center">
                 {testimonial.avatar && (
-                  <img
+                  <Image
                     src={testimonial.avatar}
                     alt={testimonial.author}
+                    width={48}
+                    height={48}
                     className="w-12 h-12 rounded-full object-cover mr-4"
                   />
                 )}

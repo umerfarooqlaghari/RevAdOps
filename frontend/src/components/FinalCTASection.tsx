@@ -26,7 +26,7 @@ const FinalCTASection = () => {
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl mb-12 opacity-90 leading-relaxed max-w-3xl mx-auto">
-            Whether you're running a website, mobile app, or video platform, RevAdOps has
+            Whether you&apos;re running a website, mobile app, or video platform, RevAdOps has
             the tools and expertise to take your monetization to the next level.
           </p>
 

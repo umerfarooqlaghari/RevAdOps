@@ -194,7 +194,7 @@ export default function DynamicContactMapSection({ content }: ContactMapProps) {
         {/* Additional Info */}
         <div className="mt-16 text-center">
           <div className="bg-blue-600 text-white rounded-2xl p-8 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold mb-4">Can't Visit in Person?</h3>
+            <h3 className="text-2xl font-bold mb-4">Can&apos;t Visit in Person?</h3>
             <p className="text-blue-100 mb-6">
               No problem! We offer virtual consultations and meetings to accommodate your schedule.
             </p>

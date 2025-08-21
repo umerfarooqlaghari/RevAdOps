@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import { CheckCircle, Award, Clock, Users } from 'lucide-react';
 
 interface ServicesFeaturesProps {
@@ -23,7 +25,7 @@ interface ServicesFeaturesProps {
   };
 }
 
-const iconMap: { [key: string]: any } = {
+const iconMap: { [key: string]: React.ComponentType<{className?: string}> } = {
   check: CheckCircle,
   award: Award,
   clock: Clock,
@@ -98,9 +100,11 @@ export default function DynamicServicesFeaturesSection({ content }: ServicesFeat
 
           <div className="relative">
             {content.image ? (
-              <img
+              <Image
                 src={content.image}
                 alt="Services Features"
+                width={600}
+                height={400}
                 className="rounded-2xl shadow-2xl"
               />
             ) : (
@@ -109,7 +113,7 @@ export default function DynamicServicesFeaturesSection({ content }: ServicesFeat
                   <div className="text-center">
                     <h3 className="text-2xl font-bold mb-4">Our Commitment</h3>
                     <p className="text-blue-100">
-                      We're dedicated to helping your business succeed in the digital landscape.
+                      We&apos;re dedicated to helping your business succeed in the digital landscape.
                     </p>
                   </div>
                   

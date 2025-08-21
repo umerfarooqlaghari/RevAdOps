@@ -1,6 +1,7 @@
 'use client';
 
 import { TrendingUp, Shield, Settings, Handshake } from 'lucide-react';
+import Image from 'next/image';
 
 const WhyChooseSection = () => {
   const benefits = [
@@ -121,9 +122,11 @@ const WhyChooseSection = () => {
                   { name: "HubSpot", logo: "https://logo.clearbit.com/hubspot.com" }
                 ].map((tool, index) => (
                   <div key={index} className="w-20 h-20 bg-white rounded-lg shadow-sm flex items-center justify-center p-3">
-                    <img
+                    <Image
                       src={tool.logo}
                       alt={tool.name}
+                      width={60}
+                      height={60}
                       className="w-full h-full object-contain grayscale hover:grayscale-0 transition-all duration-300"
                     />
                   </div>

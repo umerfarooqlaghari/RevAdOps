@@ -159,7 +159,7 @@ export default function DynamicBlogCTASection({ content }: BlogCTAProps) {
             <div className="bg-white bg-opacity-10 rounded-2xl p-8">
               <h3 className="text-xl font-bold mb-6 flex items-center">
                 <Users className="h-6 w-6 mr-3" />
-                What You'll Get
+                What You&apos;ll Get
               </h3>
               
               <div className="space-y-4">

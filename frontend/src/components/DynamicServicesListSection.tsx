@@ -37,7 +37,7 @@ interface ServicesListProps {
   };
 }
 
-const iconMap: { [key: string]: any } = {
+const iconMap: { [key: string]: React.ComponentType<{className?: string}> } = {
   search: Search,
   target: Target,
   trending: TrendingUp,

@@ -9,7 +9,7 @@ interface ContentItem {
   key: string;
   value: string;
   type: 'text';
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   order?: number;
 }
 
@@ -46,7 +46,7 @@ export default function HomepageAdmin() {
         headers: { 'Authorization': `Bearer ${token}` },
       });
 
-      let apiContent = {};
+      let apiContent: Record<string, Record<string, string>> = {};
       if (response.ok) {
         apiContent = await response.json();
       }
@@ -186,7 +186,7 @@ export default function HomepageAdmin() {
     setIsSaving(true);
     try {
       const token = localStorage.getItem('adminToken');
-      const updates: any[] = [];
+      const updates: Array<{section: string; key: string; value: string; type: string; metadata?: Record<string, unknown>; order?: number}> = [];
 
       // Only save items that have changed
       Object.entries(content).forEach(([section, items]) => {
@@ -320,7 +320,7 @@ export default function HomepageAdmin() {
             </h3>
 
             <div className="space-y-6">
-              {content[activeSection as keyof HomepageContent]?.map((item, index) => (
+              {content[activeSection as keyof HomepageContent]?.map((item) => (
                 <div key={`${item.section}-${item.key}`} className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700 capitalize">
                     {item.key.replace(/_/g, ' ')}

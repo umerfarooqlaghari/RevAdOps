@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 interface ExpertiseContent {
   title?: string;
   description?: string;
@@ -67,9 +69,11 @@ const DynamicExpertiseSection = ({ content }: DynamicExpertiseSectionProps) => {
             <div key={index} className="bg-gray-50 rounded-xl p-8 text-center">
               {area.icon && (
                 <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mb-6 mx-auto">
-                  <img
+                  <Image
                     src={area.icon}
                     alt={area.title}
+                    width={32}
+                    height={32}
                     className="h-8 w-8 object-contain"
                   />
                 </div>

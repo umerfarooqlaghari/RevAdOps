@@ -49,7 +49,7 @@ interface ConsultationBenefitsProps {
   };
 }
 
-const iconMap: { [key: string]: any } = {
+const iconMap: { [key: string]: React.ComponentType<{className?: string}> } = {
   target: Target,
   trending: TrendingUp,
   users: Users,

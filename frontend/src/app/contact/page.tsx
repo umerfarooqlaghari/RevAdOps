@@ -6,15 +6,24 @@ import DynamicContactFormSection from '@/components/DynamicContactFormSection';
 import DynamicContactMapSection from '@/components/DynamicContactMapSection';
 import { useState, useEffect } from 'react';
 
+interface ContentSection {
+  [key: string]: string;
+}
+
 interface ContactContent {
-  hero: any;
-  info: any;
-  form: any;
-  map: any;
+  hero: ContentSection;
+  info: ContentSection;
+  form: ContentSection;
+  map: ContentSection;
 }
 
 export default function ContactPage() {
-  const [content, setContent] = useState<any>({});
+  const [content, setContent] = useState<ContactContent>({
+    hero: {},
+    info: {},
+    form: {},
+    map: {}
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

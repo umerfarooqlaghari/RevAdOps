@@ -58,7 +58,7 @@ const ServicesSection = () => {
             Our Professional Services
           </h2>
           <p className="text-lg text-gray-600 leading-relaxed">
-            We offer comprehensive solutions designed to help your business thrive in today's 
+            We offer comprehensive solutions designed to help your business thrive in today&apos;s
             competitive landscape. Our expert team delivers results that matter.
           </p>
         </div>
@@ -115,7 +115,7 @@ const ServicesSection = () => {
               Ready to Transform Your Business?
             </h3>
             <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-              Let's discuss how our services can help you achieve your goals. 
+              Let&apos;s discuss how our services can help you achieve your goals.
               Get a free consultation with our experts today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

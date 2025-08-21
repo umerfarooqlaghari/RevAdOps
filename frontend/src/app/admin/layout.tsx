@@ -3,20 +3,16 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import {
-  Home,
-  Settings,
-  FileText,
-  Image,
-  Users,
-  BarChart3,
+import { 
+  Home, 
+  Settings, 
+  FileText, 
+  Image, 
+  Users, 
+  BarChart3, 
   LogOut,
   Menu,
-  X,
-  Briefcase,
-  BookOpen,
-  Mail,
-  Calendar
+  X
 } from 'lucide-react';
 
 interface AdminUser {
@@ -24,13 +20,6 @@ interface AdminUser {
   email: string;
   name: string;
   role: string;
-}
-
-interface NavigationItem {
-  name: string;
-  href?: string;
-  icon?: any;
-  items?: NavigationItem[];
 }
 
 export default function AdminLayout({
@@ -95,18 +84,9 @@ export default function AdminLayout({
     router.push('/admin/login');
   };
 
-  const navigation: NavigationItem[] = [
+  const navigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: Home },
-    {
-      name: 'Content Management',
-      items: [
-        { name: 'Homepage', href: '/admin/homepage', icon: Home },
-        { name: 'Services', href: '/admin/services', icon: Briefcase },
-        { name: 'Blog', href: '/admin/blog', icon: BookOpen },
-        { name: 'Contact', href: '/admin/contact', icon: Mail },
-        { name: 'Consultation', href: '/admin/consultation', icon: Calendar },
-      ]
-    },
+    { name: 'Homepage Content', href: '/admin/homepage', icon: FileText },
     { name: 'Media Library', href: '/admin/media', icon: Image },
     { name: 'Leads', href: '/admin/leads', icon: Users },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
@@ -152,47 +132,26 @@ export default function AdminLayout({
 
         <nav className="mt-6 px-3">
           <div className="space-y-1">
-            {navigation.map((item) => (
-              <div key={item.name}>
-                {item.href ? (
-                  <Link
-                    href={item.href}
-                    className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
-                      pathname === item.href
-                        ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <item.icon className={`mr-3 h-5 w-5 ${pathname === item.href ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'}`} />
-                    {item.name}
-                  </Link>
-                ) : (
-                  <div>
-                    <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      {item.name}
-                    </div>
-                    <div className="space-y-1">
-                      {item.items?.map((subItem) => (
-                        <Link
-                          key={subItem.name}
-                          href={subItem.href!}
-                          className={`group flex items-center pl-6 pr-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
-                            pathname === subItem.href
-                              ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                          }`}
-                          onClick={() => setSidebarOpen(false)}
-                        >
-                          <subItem.icon className={`mr-3 h-4 w-4 ${pathname === subItem.href ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'}`} />
-                          {subItem.name}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                    isActive
+                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <Icon className={`mr-3 h-5 w-5 ${isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'}`} />
+                  {item.name}
+                </Link>
+              );
+            })}
           </div>
         </nav>
 

@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Upload, 
-  Image as ImageIcon, 
-  Video, 
-  Trash2, 
+import Image from 'next/image';
+import {
+  Upload,
+  Image as ImageIcon,
+  Video,
+  Trash2,
   Search,
-  Filter,
   Grid,
   List
 } from 'lucide-react';
@@ -228,10 +228,11 @@ export default function MediaLibrary() {
                 <>
                   <div className="aspect-square bg-gray-100 flex items-center justify-center">
                     {asset.mimeType.startsWith('image/') ? (
-                      <img
+                      <Image
                         src={asset.cloudinaryUrl}
                         alt={asset.altText || asset.originalName}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     ) : (
                       <Video className="h-12 w-12 text-gray-400" />
@@ -256,9 +257,11 @@ export default function MediaLibrary() {
                 <>
                   <div className="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-md flex items-center justify-center mr-4">
                     {asset.mimeType.startsWith('image/') ? (
-                      <img
+                      <Image
                         src={asset.cloudinaryUrl}
                         alt={asset.altText || asset.originalName}
+                        width={64}
+                        height={64}
                         className="w-full h-full object-cover rounded-md"
                       />
                     ) : (

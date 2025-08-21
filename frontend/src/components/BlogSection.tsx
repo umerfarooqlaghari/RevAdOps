@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 const BlogSection = () => {
   const blogPosts = [
     {
@@ -44,9 +46,11 @@ const BlogSection = () => {
             >
               {/* Blog Image */}
               <div className="relative">
-                <img
+                <Image
                   src={post.image}
                   alt={post.title}
+                  width={400}
+                  height={192}
                   className="w-full h-48 object-cover"
                 />
                 <div className="absolute top-4 left-4">

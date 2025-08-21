@@ -5,14 +5,22 @@ import DynamicConsultationBenefitsSection from '@/components/DynamicConsultation
 import DynamicConsultationFormSection from '@/components/DynamicConsultationFormSection';
 import { useState, useEffect } from 'react';
 
+interface ContentSection {
+  [key: string]: string;
+}
+
 interface ConsultationContent {
-  hero: any;
-  benefits: any;
-  form: any;
+  hero: ContentSection;
+  benefits: ContentSection;
+  form: ContentSection;
 }
 
 export default function ConsultationPage() {
-  const [content, setContent] = useState<any>({});
+  const [content, setContent] = useState<ConsultationContent>({
+    hero: {},
+    benefits: {},
+    form: {}
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

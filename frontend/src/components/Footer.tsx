@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
+
 
 interface FooterContent {
   logo?: string;
@@ -21,8 +21,7 @@ interface FooterContent {
 }
 
 const Footer = () => {
-  const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [footerContent, setFooterContent] = useState<FooterContent>({});
 
   useEffect(() => {
@@ -41,43 +40,7 @@ const Footer = () => {
     }
   };
 
-  const handleNewsletterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    try {
-      // TODO: Implement newsletter signup API call
-      console.log('Newsletter signup:', email);
-      setEmail('');
-      // Show success message
-    } catch (error) {
-      console.error('Newsletter signup error:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
-  const quickLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'About Us', href: '/about' },
-    { name: 'Services', href: '/services' },
-    { name: 'Blog', href: '/blog' },
-    { name: 'Contact', href: '/contact' },
-  ];
-
-  const services = [
-    { name: 'Header Bidding', href: '/services/header-bidding' },
-    { name: 'Programmatic Deals', href: '/services/programmatic' },
-    { name: 'Revenue Analytics', href: '/services/analytics' },
-    { name: 'Ad Fraud Protection', href: '/services/fraud-protection' },
-  ];
-
-  const socialLinks = [
-    { name: 'Facebook', href: '#', icon: Facebook },
-    { name: 'Twitter', href: '#', icon: Twitter },
-    { name: 'LinkedIn', href: '#', icon: Linkedin },
-    { name: 'Instagram', href: '#', icon: Instagram },
-  ];
 
   return (
     <footer className="bg-gray-900 text-white">

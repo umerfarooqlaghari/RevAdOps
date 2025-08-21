@@ -6,15 +6,24 @@ import DynamicBlogCategoriesSection from '@/components/DynamicBlogCategoriesSect
 import DynamicBlogListSection from '@/components/DynamicBlogListSection';
 import DynamicBlogCTASection from '@/components/DynamicBlogCTASection';
 
+interface ContentSection {
+  [key: string]: string;
+}
+
 interface BlogContent {
-  hero: any;
-  categories: any;
-  blog_list: any;
-  cta: any;
+  hero: ContentSection;
+  categories: ContentSection;
+  blog_list: ContentSection;
+  cta: ContentSection;
 }
 
 export default function BlogPage() {
-  const [content, setContent] = useState<any>({});
+  const [content, setContent] = useState<BlogContent>({
+    hero: {},
+    categories: {},
+    blog_list: {},
+    cta: {}
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

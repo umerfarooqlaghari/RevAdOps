@@ -110,7 +110,7 @@ export default function DynamicConsultationHeroSection({ content }: Consultation
                     </div>
                   </div>
                   <blockquote className="text-lg text-gray-700 mb-4">
-                    "{content.testimonial_text}"
+                    &ldquo;{content.testimonial_text}&rdquo;
                   </blockquote>
                   <div className="flex items-center">
                     <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">

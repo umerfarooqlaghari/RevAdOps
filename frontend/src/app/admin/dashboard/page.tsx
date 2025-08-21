@@ -1,14 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  FileText, 
-  Image, 
-  Users, 
-  BarChart3,
-  TrendingUp,
-  Eye,
-  Calendar
+import {
+  FileText,
+  Image,
+  Users,
+  Eye
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -38,8 +35,6 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const token = localStorage.getItem('adminToken');
-      
       // Simulate API calls for now
       // In real implementation, you would fetch actual data
       setStats({
@@ -165,7 +160,7 @@ export default function AdminDashboard() {
               href="/admin/media"
               className="flex items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors duration-200"
             >
-              <Image className="h-5 w-5 text-green-500 mr-3" />
+              <Image className="h-5 w-5 text-green-500 mr-3" aria-label="Upload Media" />
               <div>
                 <p className="font-medium text-gray-900">Upload Media</p>
                 <p className="text-sm text-gray-600">Add new images and videos</p>
@@ -204,7 +199,7 @@ export default function AdminDashboard() {
                   )}
                   {activity.type === 'media' && (
                     <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                      <Image className="h-4 w-4 text-purple-600" />
+                      <Image className="h-4 w-4 text-purple-600" aria-label="Media Activity" />
                     </div>
                   )}
                 </div>
@@ -236,7 +231,7 @@ export default function AdminDashboard() {
         </div>
         <div className="bg-gray-100 rounded-lg p-4">
           <p className="text-gray-600 text-center">
-            Preview your website changes here. Click "View Live Site" to see the current website.
+            Preview your website changes here. Click &quot;View Live Site&quot; to see the current website.
           </p>
         </div>
       </div>

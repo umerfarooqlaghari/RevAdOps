@@ -47,7 +47,7 @@ interface ContactInfoProps {
   };
 }
 
-const iconMap: { [key: string]: any } = {
+const iconMap: { [key: string]: React.ComponentType<{className?: string}> } = {
   phone: Phone,
   mail: Mail,
   map: MapPin,

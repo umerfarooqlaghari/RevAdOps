@@ -1,15 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Mail, 
-  Phone, 
-  Building, 
-  Calendar,
+import {
+  Mail,
+  Phone,
+  Building,
   Eye,
   Trash2,
-  Download,
-  Filter
+  Download
 } from 'lucide-react';
 
 interface Lead {
@@ -36,8 +34,6 @@ export default function LeadsManagement() {
 
   const fetchLeads = async () => {
     try {
-      const token = localStorage.getItem('adminToken');
-      
       // Simulate API call with dummy data for now
       const dummyLeads: Lead[] = [
         {

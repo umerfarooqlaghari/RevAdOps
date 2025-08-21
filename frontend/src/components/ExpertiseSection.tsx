@@ -76,10 +76,7 @@ const ExpertiseSection = () => {
     setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
   };
 
-  const getCurrentItems = () => {
-    const startIndex = currentSlide * itemsPerSlide;
-    return expertise.slice(startIndex, startIndex + itemsPerSlide);
-  };
+
 
   return (
     <section className="section-padding bg-gray-50">

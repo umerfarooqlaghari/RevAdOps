@@ -12,12 +12,24 @@ import DynamicTestimonialsSection from '@/components/DynamicTestimonialsSection'
 import DynamicPartnersSection from '@/components/DynamicPartnersSection';
 import DynamicFinalCTASection from '@/components/DynamicFinalCTASection';
 
+interface ContentSection {
+  [key: string]: string;
+}
+
 interface ContentData {
-  [key: string]: any;
+  hero?: ContentSection;
+  what_we_do?: ContentSection;
+  why_choose_us?: ContentSection;
+  how_it_works?: ContentSection;
+  our_expertise?: ContentSection;
+  testimonials?: ContentSection;
+  partners?: ContentSection;
+  final_cta?: ContentSection;
+  [key: string]: ContentSection | undefined;
 }
 
 export default function Home() {
-  const [content, setContent] = useState<any>({});
+  const [content, setContent] = useState<ContentData>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

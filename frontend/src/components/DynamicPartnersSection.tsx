@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 interface PartnersContent {
   title?: string;
   description?: string;
@@ -64,11 +66,15 @@ const DynamicPartnersSection = ({ content }: DynamicPartnersSectionProps) => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center">
           {partners.map((partner, index) => (
             <div key={index} className="flex items-center justify-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <img 
-                src={partner.logo} 
-                alt={partner.name} 
-                className="max-h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all"
-              />
+              {partner.logo && (
+                <Image
+                  src={partner.logo}
+                  alt={partner.name}
+                  width={120}
+                  height={48}
+                  className="max-h-12 w-auto object-contain grayscale hover:grayscale-0 transition-all"
+                />
+              )}
             </div>
           ))}
         </div>

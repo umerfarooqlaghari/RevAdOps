@@ -120,10 +120,10 @@ export default function DynamicConsultationFormSection({ content }: Consultation
             <div className="bg-blue-50 rounded-lg p-6 mb-8">
               <h3 className="text-lg font-semibold text-blue-900 mb-2">What happens next?</h3>
               <ul className="text-blue-800 space-y-2">
-                <li>• You'll receive a confirmation email within 5 minutes</li>
+                <li>• You&apos;ll receive a confirmation email within 5 minutes</li>
                 <li>• Our team will call you within 24 hours to schedule</li>
-                <li>• We'll send you a calendar invite with meeting details</li>
-                <li>• Prepare any questions you'd like to discuss</li>
+                <li>• We&apos;ll send you a calendar invite with meeting details</li>
+                <li>• Prepare any questions you&apos;d like to discuss</li>
               </ul>
             </div>
             <button
