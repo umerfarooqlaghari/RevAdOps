@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import DynamicConsultationHeroSection from '@/components/DynamicConsultationHeroSection';
 import DynamicConsultationBenefitsSection from '@/components/DynamicConsultationBenefitsSection';
 import DynamicConsultationFormSection from '@/components/DynamicConsultationFormSection';
+import { useState, useEffect } from 'react';
 
 interface ConsultationContent {
   hero: any;
@@ -12,7 +12,7 @@ interface ConsultationContent {
 }
 
 export default function ConsultationPage() {
-  const [content, setContent] = useState<ConsultationContent | null>(null);
+  const [content, setContent] = useState<any>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,14 +20,14 @@ export default function ConsultationPage() {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content`);
         const data = await response.json();
-        
+
         // Extract consultation-related content
         const consultationContent = {
           hero: data.consultation_hero || {},
           benefits: data.consultation_benefits || {},
           form: data.consultation_form || {}
         };
-        
+
         setContent(consultationContent);
       } catch (error) {
         console.error('Error fetching consultation content:', error);

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import DynamicServicesHeroSection from '@/components/DynamicServicesHeroSection';
 import DynamicServicesListSection from '@/components/DynamicServicesListSection';
 import DynamicServicesFeaturesSection from '@/components/DynamicServicesFeaturesSection';
 import DynamicServicesProcessSection from '@/components/DynamicServicesProcessSection';
 import DynamicServicesCTASection from '@/components/DynamicServicesCTASection';
+import { useState, useEffect } from 'react';
 
 interface ServicesContent {
   hero: any;
@@ -16,7 +16,7 @@ interface ServicesContent {
 }
 
 export default function ServicesPage() {
-  const [content, setContent] = useState<ServicesContent | null>(null);
+  const [content, setContent] = useState<any>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function ServicesPage() {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content`);
         const data = await response.json();
-        
+
         // Extract services-related content
         const servicesContent = {
           hero: data.services_hero || {},
@@ -33,7 +33,7 @@ export default function ServicesPage() {
           process: data.services_process || {},
           cta: data.services_cta || {}
         };
-        
+
         setContent(servicesContent);
       } catch (error) {
         console.error('Error fetching services content:', error);

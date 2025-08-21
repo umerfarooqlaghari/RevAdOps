@@ -17,37 +17,19 @@ interface ContentData {
 }
 
 export default function Home() {
-  const [content, setContent] = useState<ContentData>({});
+  const [content, setContent] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchContent();
-
-    // Listen for storage events to refresh content when admin makes changes
-    const handleStorageChange = () => {
-      fetchContent();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    // Also refresh content every 30 seconds to pick up changes
-    const interval = setInterval(fetchContent, 30000);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
   }, []);
 
   const fetchContent = async () => {
     try {
-      // Add cache busting to ensure fresh content
-      const timestamp = new Date().getTime();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content?t=${timestamp}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content`);
       if (response.ok) {
         const data = await response.json();
         setContent(data);
-        console.log('Content refreshed:', data);
       }
     } catch (error) {
       console.error('Failed to fetch content:', error);
@@ -63,6 +45,8 @@ export default function Home() {
       </div>
     );
   }
+
+
 
   return (
     <div className="min-h-screen">

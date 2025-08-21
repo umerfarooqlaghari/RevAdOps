@@ -18,6 +18,15 @@ export const metadata: Metadata = {
   authors: [{ name: "RevAdOps Team" }],
   viewport: "width=device-width, initial-scale=1",
   robots: "index, follow",
+  icons: {
+    icon: [
+      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/revadops-logo.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/revadops-logo.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
 };
 
 export default function RootLayout({

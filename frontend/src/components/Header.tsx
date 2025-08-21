@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 
 interface HeaderContent {
@@ -43,9 +44,11 @@ const Header = () => {
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <img
-              src={headerContent.logo || "/logo-placeholder.svg"}
-              alt={headerContent.logo_alt || "RevAdOps Logo"}
+            <Image
+              src="/logo.png"
+              alt="RevAdOps Logo"
+              width={120}
+              height={40}
               className="h-10 w-auto"
             />
           </Link>

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import DynamicContactHeroSection from '@/components/DynamicContactHeroSection';
 import DynamicContactInfoSection from '@/components/DynamicContactInfoSection';
 import DynamicContactFormSection from '@/components/DynamicContactFormSection';
 import DynamicContactMapSection from '@/components/DynamicContactMapSection';
+import { useState, useEffect } from 'react';
 
 interface ContactContent {
   hero: any;
@@ -14,7 +14,7 @@ interface ContactContent {
 }
 
 export default function ContactPage() {
-  const [content, setContent] = useState<ContactContent | null>(null);
+  const [content, setContent] = useState<any>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function ContactPage() {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content`);
         const data = await response.json();
-        
+
         // Extract contact-related content
         const contactContent = {
           hero: data.contact_hero || {},
@@ -30,7 +30,7 @@ export default function ContactPage() {
           form: data.contact_form || {},
           map: data.contact_map || {}
         };
-        
+
         setContent(contactContent);
       } catch (error) {
         console.error('Error fetching contact content:', error);

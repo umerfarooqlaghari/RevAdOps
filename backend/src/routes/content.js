@@ -5,6 +5,37 @@ import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Simple rate limiting for content updates
+const updateLimiter = new Map();
+const RATE_LIMIT_WINDOW = 3000; // 3 seconds
+const MAX_UPDATES_PER_WINDOW = 2;
+
+const checkRateLimit = (req, res, next) => {
+  const clientId = req.ip + (req.user?.id || 'anonymous');
+  const now = Date.now();
+
+  if (!updateLimiter.has(clientId)) {
+    updateLimiter.set(clientId, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return next();
+  }
+
+  const limit = updateLimiter.get(clientId);
+
+  if (now > limit.resetTime) {
+    updateLimiter.set(clientId, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return next();
+  }
+
+  if (limit.count >= MAX_UPDATES_PER_WINDOW) {
+    return res.status(429).json({
+      message: 'Too many update requests. Please wait a moment before trying again.'
+    });
+  }
+
+  limit.count++;
+  next();
+};
+
 // Get content by section
 router.get('/:section', async (req, res) => {
   try {
@@ -33,7 +64,7 @@ router.get('/:section', async (req, res) => {
 });
 
 // Update content
-router.put('/:section/:key', authenticateToken, [
+router.put('/:section/:key', authenticateToken, checkRateLimit, [
   body('value').notEmpty(),
   body('type').optional().isIn(['text', 'image', 'html'])
 ], async (req, res) => {
@@ -75,8 +106,8 @@ router.put('/:section/:key', authenticateToken, [
   }
 });
 
-// Bulk update content for a section
-router.put('/:section', authenticateToken, async (req, res) => {
+// Optimized bulk update content for a section
+router.put('/:section', authenticateToken, checkRateLimit, async (req, res) => {
   try {
     const { section } = req.params;
     const { content } = req.body;
@@ -85,49 +116,78 @@ router.put('/:section', authenticateToken, async (req, res) => {
       return res.status(400).json({ message: 'Invalid content data' });
     }
 
-    const updates = [];
-    
-    for (const [key, data] of Object.entries(content)) {
-      updates.push(
-        prisma.content.upsert({
-          where: {
-            section_key: {
-              section,
-              key
-            }
-          },
-          update: {
-            value: data.value,
-            type: data.type || 'text'
-          },
-          create: {
-            section,
-            key,
-            value: data.value,
-            type: data.type || 'text'
-          }
-        })
-      );
-    }
+    console.log(`Updating section: ${section} with ${Object.keys(content).length} items`);
+    const startTime = Date.now();
 
-    await Promise.all(updates);
+    // Use a single transaction for all operations
+    await prisma.$transaction(async (tx) => {
+      // Process in smaller batches to avoid overwhelming the database
+      const entries = Object.entries(content);
+      const batchSize = 5; // Smaller batches for better performance
 
-    res.json({ message: 'Content updated successfully' });
+      for (let i = 0; i < entries.length; i += batchSize) {
+        const batch = entries.slice(i, i + batchSize);
+
+        await Promise.all(
+          batch.map(([key, data]) =>
+            tx.content.upsert({
+              where: {
+                section_key: { section, key }
+              },
+              update: {
+                value: data.value || '',
+                type: data.type || 'text'
+              },
+              create: {
+                section,
+                key,
+                value: data.value || '',
+                type: data.type || 'text'
+              }
+            })
+          )
+        );
+
+        // Small delay between batches to prevent overwhelming the connection
+        if (i + batchSize < entries.length) {
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
+      }
+    });
+
+    const endTime = Date.now();
+    console.log(`Section ${section} updated in ${endTime - startTime}ms`);
+
+    res.json({
+      message: 'Content updated successfully',
+      section,
+      itemsUpdated: Object.keys(content).length,
+      duration: endTime - startTime
+    });
   } catch (error) {
     console.error('Bulk update content error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({
+      message: 'Server error',
+      error: error.message
+    });
   }
 });
 
 // Get all content organized by sections
 router.get('/', async (req, res) => {
   try {
+    console.log('Fetching all content...');
+    const startTime = Date.now();
+
     const allContent = await prisma.content.findMany({
       orderBy: [
         { section: 'asc' },
         { key: 'asc' }
       ]
     });
+
+    const endTime = Date.now();
+    console.log(`Content fetched in ${endTime - startTime}ms (${allContent.length} items)`);
 
     // Organize content by sections, removing homepage_ prefix for homepage sections
     const contentBySections = allContent.reduce((acc, item) => {
@@ -144,6 +204,8 @@ router.get('/', async (req, res) => {
       acc[sectionName][item.key] = item.value;
       return acc;
     }, {});
+
+
 
     res.json(contentBySections);
   } catch (error) {

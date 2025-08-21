@@ -14,7 +14,7 @@ interface BlogContent {
 }
 
 export default function BlogPage() {
-  const [content, setContent] = useState<BlogContent | null>(null);
+  const [content, setContent] = useState<any>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function BlogPage() {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content`);
         const data = await response.json();
-        
+
         // Extract blog-related content
         const blogContent = {
           hero: data.blog_hero || {},
@@ -30,7 +30,7 @@ export default function BlogPage() {
           blog_list: data.blog_list || {},
           cta: data.blog_cta || {}
         };
-        
+
         setContent(blogContent);
       } catch (error) {
         console.error('Error fetching blog content:', error);

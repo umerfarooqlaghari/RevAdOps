@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
 
@@ -85,9 +86,11 @@ const Footer = () => {
           {/* Logo Section */}
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center space-x-3">
-              <img
-                src={footerContent.logo || "/logo-placeholder.svg"}
-                alt={footerContent.logo_alt || "RevAdOps Logo"}
+              <Image
+                src="/logo.png"
+                alt="RevAdOps Logo"
+                width={96}
+                height={32}
                 className="h-8 w-auto"
               />
             </Link>
