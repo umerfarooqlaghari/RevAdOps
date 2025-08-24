@@ -9,11 +9,28 @@ import DynamicWhyChooseSection from '@/components/DynamicWhyChooseSection';
 import DynamicHowItWorksSection from '@/components/DynamicHowItWorksSection';
 import DynamicExpertiseSection from '@/components/DynamicExpertiseSection';
 import DynamicTestimonialsSection from '@/components/DynamicTestimonialsSection';
-import DynamicPartnersSection from '@/components/DynamicPartnersSection';
+
 import DynamicFinalCTASection from '@/components/DynamicFinalCTASection';
 
 interface ContentSection {
   [key: string]: string;
+}
+
+interface ExpertiseItem {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  order: number;
+}
+
+interface TestimonialItem {
+  id: string;
+  text: string;
+  author: string;
+  company: string;
+  avatar?: string;
+  order: number;
 }
 
 interface ContentData {
@@ -23,13 +40,14 @@ interface ContentData {
   how_it_works?: ContentSection;
   our_expertise?: ContentSection;
   testimonials?: ContentSection;
-  partners?: ContentSection;
   final_cta?: ContentSection;
   [key: string]: ContentSection | undefined;
 }
 
 export default function Home() {
   const [content, setContent] = useState<ContentData>({});
+  const [expertiseItems, setExpertiseItems] = useState<ExpertiseItem[]>([]);
+  const [testimonialItems, setTestimonialItems] = useState<TestimonialItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -38,10 +56,25 @@ export default function Home() {
 
   const fetchContent = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content`);
-      if (response.ok) {
-        const data = await response.json();
+      // Fetch regular content
+      const contentResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content`);
+      if (contentResponse.ok) {
+        const data = await contentResponse.json();
         setContent(data);
+      }
+
+      // Fetch expertise items
+      const expertiseResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/expertise`);
+      if (expertiseResponse.ok) {
+        const expertiseData = await expertiseResponse.json();
+        setExpertiseItems(expertiseData.items || []);
+      }
+
+      // Fetch testimonials
+      const testimonialsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/testimonials`);
+      if (testimonialsResponse.ok) {
+        const testimonialsData = await testimonialsResponse.json();
+        setTestimonialItems(testimonialsData.items || []);
       }
     } catch (error) {
       console.error('Failed to fetch content:', error);
@@ -68,9 +101,9 @@ export default function Home() {
         <DynamicWhatWeDoSection content={content.what_we_do || {}} />
         <DynamicWhyChooseSection content={content.why_choose_us || {}} />
         <DynamicHowItWorksSection content={content.how_it_works || {}} />
-        <DynamicExpertiseSection content={content.our_expertise || {}} />
-        <DynamicTestimonialsSection content={content.testimonials || {}} />
-        <DynamicPartnersSection content={content.partners || {}} />
+        <DynamicExpertiseSection content={content.our_expertise || {}} items={expertiseItems} />
+        <DynamicTestimonialsSection content={content.testimonials || {}} items={testimonialItems} />
+
         <DynamicFinalCTASection content={content.final_cta || {}} />
       </main>
       <Footer />

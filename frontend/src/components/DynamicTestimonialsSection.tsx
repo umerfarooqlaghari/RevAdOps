@@ -1,10 +1,22 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import { ChevronLeft, ChevronRight, Quote, User } from 'lucide-react';
+
+interface TestimonialItem {
+  text: string;
+  author: string;
+  company: string;
+  logo?: string;
+  avatar?: string;
+}
 
 interface TestimonialsContent {
   title?: string;
   description?: string;
+  items?: TestimonialItem[];
+  // Legacy support for existing data structure
   testimonial_1_text?: string;
   testimonial_1_author?: string;
   testimonial_1_company?: string;
@@ -24,9 +36,13 @@ interface TestimonialsContent {
 
 interface DynamicTestimonialsSectionProps {
   content: TestimonialsContent;
+  items?: TestimonialItem[];
 }
 
-const DynamicTestimonialsSection = ({ content }: DynamicTestimonialsSectionProps) => {
+const DynamicTestimonialsSection = ({ content, items }: DynamicTestimonialsSectionProps) => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const sliderRef = useRef<HTMLDivElement>(null);
+
   const defaultContent = {
     title: "What Our Clients Say",
     description: "Hear from publishers who have transformed their ad revenue with RevAdOps.",
@@ -43,29 +59,56 @@ const DynamicTestimonialsSection = ({ content }: DynamicTestimonialsSectionProps
 
   const sectionData = { ...defaultContent, ...content };
 
-  const testimonials = [
+  // Build testimonials from either new format or legacy format
+  const testimonials: TestimonialItem[] = items || content.items || [
     {
-      text: sectionData.testimonial_1_text,
-      author: sectionData.testimonial_1_author,
-      company: sectionData.testimonial_1_company,
+      text: sectionData.testimonial_1_text || "RevAdOps increased our ad revenue by 45% in just 3 months. Their team is incredibly knowledgeable and responsive.",
+      author: sectionData.testimonial_1_author || "Sarah Johnson",
+      company: sectionData.testimonial_1_company || "TechNews Daily",
       logo: sectionData.testimonial_1_logo,
       avatar: sectionData.testimonial_1_avatar
     },
     {
-      text: sectionData.testimonial_2_text,
-      author: sectionData.testimonial_2_author,
-      company: sectionData.testimonial_2_company,
+      text: sectionData.testimonial_2_text || "The fraud detection capabilities saved us thousands in invalid traffic. Highly recommend their services.",
+      author: sectionData.testimonial_2_author || "Mike Chen",
+      company: sectionData.testimonial_2_company || "Gaming Hub",
       logo: sectionData.testimonial_2_logo,
       avatar: sectionData.testimonial_2_avatar
     },
     {
-      text: sectionData.testimonial_3_text,
-      author: sectionData.testimonial_3_author,
-      company: sectionData.testimonial_3_company,
+      text: sectionData.testimonial_3_text || "Professional service and outstanding results. Our fill rates improved dramatically.",
+      author: sectionData.testimonial_3_author || "Lisa Rodriguez",
+      company: sectionData.testimonial_3_company || "Mobile App Co.",
       logo: sectionData.testimonial_3_logo,
       avatar: sectionData.testimonial_3_avatar
     }
   ];
+
+  const itemsPerSlide = 1; // Show one testimonial at a time for better focus
+  const totalSlides = testimonials.length;
+
+  // Auto-advance slides
+  useEffect(() => {
+    if (totalSlides > 1) {
+      const timer = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % totalSlides);
+      }, 6000); // Change slide every 6 seconds
+
+      return () => clearInterval(timer);
+    }
+  }, [totalSlides]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % totalSlides);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index);
+  };
 
   return (
     <section className="py-20 bg-gray-50">
@@ -79,40 +122,103 @@ const DynamicTestimonialsSection = ({ content }: DynamicTestimonialsSectionProps
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
-            <div key={index} className="bg-white rounded-xl p-8 shadow-lg">
-              {testimonial.logo && (
-                <div className="mb-4">
-                  <Image
-                    src={testimonial.logo}
-                    alt={`${testimonial.company} logo`}
-                    width={120}
-                    height={32}
-                    className="h-8 object-contain"
-                  />
+        {/* Testimonials Slider */}
+        <div className="relative max-w-4xl mx-auto">
+          {/* Navigation Buttons */}
+          {totalSlides > 1 && (
+            <>
+              <button
+                onClick={prevSlide}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 p-3 rounded-full bg-white shadow-lg hover:shadow-xl transition-shadow duration-200 group"
+                aria-label="Previous testimonial"
+              >
+                <ChevronLeft className="h-6 w-6 text-gray-600 group-hover:text-blue-600 transition-colors duration-200" />
+              </button>
+
+              <button
+                onClick={nextSlide}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 p-3 rounded-full bg-white shadow-lg hover:shadow-xl transition-shadow duration-200 group"
+                aria-label="Next testimonial"
+              >
+                <ChevronRight className="h-6 w-6 text-gray-600 group-hover:text-blue-600 transition-colors duration-200" />
+              </button>
+            </>
+          )}
+
+          {/* Slider Content */}
+          <div className="overflow-hidden rounded-2xl">
+            <div
+              ref={sliderRef}
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            >
+              {testimonials.map((testimonial, index) => (
+                <div key={index} className="w-full flex-shrink-0">
+                  <div className="bg-white rounded-2xl p-8 md:p-12 shadow-lg relative">
+                    {/* Quote Icon */}
+                    <div className="absolute top-6 left-6 text-blue-600 opacity-20">
+                      <Quote className="h-12 w-12" />
+                    </div>
+
+                    {/* Company Logo */}
+                    {testimonial.logo && (
+                      <div className="mb-8 flex justify-center">
+                        <Image
+                          src={testimonial.logo}
+                          alt={`${testimonial.company} logo`}
+                          width={150}
+                          height={40}
+                          className="h-10 object-contain"
+                        />
+                      </div>
+                    )}
+
+                    {/* Testimonial Text */}
+                    <blockquote className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8 text-center italic relative z-10">
+                      &ldquo;{testimonial.text}&rdquo;
+                    </blockquote>
+
+                    {/* Author Info */}
+                    <div className="flex items-center justify-center space-x-4">
+                      {testimonial.avatar ? (
+                        <Image
+                          src={testimonial.avatar}
+                          alt={testimonial.author}
+                          width={60}
+                          height={60}
+                          className="w-15 h-15 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-15 h-15 bg-blue-600 rounded-full flex items-center justify-center">
+                          <User className="h-8 w-8 text-white" />
+                        </div>
+                      )}
+                      <div className="text-center">
+                        <p className="font-semibold text-gray-900 text-lg">{testimonial.author}</p>
+                        <p className="text-gray-600">{testimonial.company}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )}
-              <p className="text-gray-600 mb-6 italic">
-                &ldquo;{testimonial.text}&rdquo;
-              </p>
-              <div className="flex items-center">
-                {testimonial.avatar && (
-                  <Image
-                    src={testimonial.avatar}
-                    alt={testimonial.author}
-                    width={48}
-                    height={48}
-                    className="w-12 h-12 rounded-full object-cover mr-4"
-                  />
-                )}
-                <div>
-                  <p className="font-semibold text-gray-900">{testimonial.author}</p>
-                  <p className="text-gray-500">{testimonial.company}</p>
-                </div>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          {/* Slide Indicators */}
+          {totalSlides > 1 && (
+            <div className="flex justify-center mt-8 space-x-2">
+              {testimonials.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToSlide(index)}
+                  className={`w-3 h-3 rounded-full transition-colors duration-200 ${
+                    index === currentSlide ? 'bg-blue-600' : 'bg-gray-300'
+                  }`}
+                  aria-label={`Go to testimonial ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

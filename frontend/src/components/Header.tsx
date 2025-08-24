@@ -5,8 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 
-
-
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -24,7 +22,7 @@ const Header = () => {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
             <Image
-              src="/logo.png"
+              src="/revadops-logo.png"
               alt="RevAdOps Logo"
               width={120}
               height={40}

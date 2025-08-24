@@ -261,4 +261,113 @@ router.put('/homepage/bulk', [
   }
 });
 
+// Expertise Management Routes
+// Get all expertise items (public endpoint)
+router.get('/expertise', async (req, res) => {
+  try {
+    const expertise = await prisma.expertise.findMany({
+      orderBy: { order: 'asc' }
+    });
+
+    res.json({ items: expertise });
+  } catch (error) {
+    console.error('Get expertise error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Bulk update expertise items
+router.put('/expertise/bulk', [
+  authenticateToken,
+  adminAuth,
+  body('items').isArray().withMessage('Items must be an array')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { items } = req.body;
+
+    // Use transaction to ensure data consistency
+    await prisma.$transaction(async (tx) => {
+      // Delete all existing expertise items
+      await tx.expertise.deleteMany();
+
+      // Create new items
+      if (items.length > 0) {
+        await tx.expertise.createMany({
+          data: items.map((item, index) => ({
+            title: item.title,
+            description: item.description,
+            icon: item.icon,
+            order: item.order || index + 1
+          }))
+        });
+      }
+    });
+
+    res.json({ message: 'Expertise items updated successfully' });
+  } catch (error) {
+    console.error('Bulk update expertise error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Testimonials Management Routes
+// Get all testimonials (public endpoint)
+router.get('/testimonials', async (req, res) => {
+  try {
+    const testimonials = await prisma.testimonial.findMany({
+      orderBy: { order: 'asc' }
+    });
+
+    res.json({ items: testimonials });
+  } catch (error) {
+    console.error('Get testimonials error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Bulk update testimonials
+router.put('/testimonials/bulk', [
+  authenticateToken,
+  adminAuth,
+  body('items').isArray().withMessage('Items must be an array')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { items } = req.body;
+
+    // Use transaction to ensure data consistency
+    await prisma.$transaction(async (tx) => {
+      // Delete all existing testimonials
+      await tx.testimonial.deleteMany();
+
+      // Create new items
+      if (items.length > 0) {
+        await tx.testimonial.createMany({
+          data: items.map((item, index) => ({
+            text: item.text,
+            author: item.author,
+            company: item.company,
+            avatar: item.avatar || null,
+            order: item.order || index + 1
+          }))
+        });
+      }
+    });
+
+    res.json({ message: 'Testimonials updated successfully' });
+  } catch (error) {
+    console.error('Bulk update testimonials error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router;
