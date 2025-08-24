@@ -13,15 +13,56 @@ const adminAuth = (req, res, next) => {
   next();
 };
 
+// Get all content for homepage sections (specific route first)
+router.get('/homepage/all', authenticateToken, adminAuth, async (req, res) => {
+  try {
+    const sections = [
+      'homepage_hero',
+      'homepage_what_we_do',
+      'homepage_why_choose',
+      'homepage_how_it_works',
+      'homepage_expertise',
+      'homepage_testimonials',
+      'homepage_final_cta'
+    ];
+
+    const content = await prisma.content.findMany({
+      where: {
+        section: { in: sections },
+        isActive: true
+      },
+      orderBy: [
+        { section: 'asc' },
+        { order: 'asc' }
+      ]
+    });
+
+    // Group content by section
+    const groupedContent = content.reduce((acc, item) => {
+      const sectionName = item.section.replace('homepage_', '');
+      if (!acc[sectionName]) {
+        acc[sectionName] = [];
+      }
+      acc[sectionName].push(item);
+      return acc;
+    }, {});
+
+    res.json({ content: groupedContent });
+  } catch (error) {
+    console.error('Get homepage content error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Get all content for a specific page
 router.get('/content/:page', authenticateToken, adminAuth, async (req, res) => {
   try {
     const { page } = req.params;
-    
+
     const content = await prisma.content.findMany({
-      where: { 
+      where: {
         section: page,
-        isActive: true 
+        isActive: true
       },
       orderBy: { order: 'asc' }
     });
@@ -152,47 +193,6 @@ router.delete('/content/:page/:section/:key', authenticateToken, adminAuth, asyn
     res.json({ message: 'Content deleted successfully' });
   } catch (error) {
     console.error('Delete content error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Get all content for homepage sections
-router.get('/homepage/all', authenticateToken, adminAuth, async (req, res) => {
-  try {
-    const sections = [
-      'homepage_hero',
-      'homepage_what_we_do', 
-      'homepage_why_choose',
-      'homepage_how_it_works',
-      'homepage_expertise',
-      'homepage_testimonials',
-      'homepage_final_cta'
-    ];
-
-    const content = await prisma.content.findMany({
-      where: {
-        section: { in: sections },
-        isActive: true
-      },
-      orderBy: [
-        { section: 'asc' },
-        { order: 'asc' }
-      ]
-    });
-
-    // Group content by section
-    const groupedContent = content.reduce((acc, item) => {
-      const sectionName = item.section.replace('homepage_', '');
-      if (!acc[sectionName]) {
-        acc[sectionName] = [];
-      }
-      acc[sectionName].push(item);
-      return acc;
-    }, {});
-
-    res.json({ content: groupedContent });
-  } catch (error) {
-    console.error('Get homepage content error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

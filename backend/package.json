@@ -6,12 +6,12 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "build": "prisma generate",
-    "postinstall": "prisma generate",
-    "deploy": "prisma migrate deploy && prisma generate",
+    "build": "npm run db:generate",
+    "postinstall": "npm run db:generate",
+    "deploy": "npm run db:migrate && npm run db:generate",
     "deploy:setup": "node scripts/deploy-setup.js",
     "db:migrate": "prisma migrate deploy",
-    "db:generate": "prisma generate",
+    "db:generate": "prisma generate --no-engine",
     "db:reset": "prisma migrate reset --force",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
