@@ -290,23 +290,20 @@ router.put('/expertise/bulk', [
 
     const { items } = req.body;
 
-    // Use transaction to ensure data consistency
-    await prisma.$transaction(async (tx) => {
-      // Delete all existing expertise items
-      await tx.expertise.deleteMany();
+    // Delete all existing expertise items first
+    await prisma.expertise.deleteMany();
 
-      // Create new items
-      if (items.length > 0) {
-        await tx.expertise.createMany({
-          data: items.map((item, index) => ({
-            title: item.title,
-            description: item.description,
-            icon: item.icon,
-            order: item.order || index + 1
-          }))
-        });
-      }
-    });
+    // Create new items
+    if (items.length > 0) {
+      await prisma.expertise.createMany({
+        data: items.map((item, index) => ({
+          title: item.title,
+          description: item.description,
+          icon: item.icon,
+          order: item.order || index + 1
+        }))
+      });
+    }
 
     res.json({ message: 'Expertise items updated successfully' });
   } catch (error) {
@@ -344,24 +341,21 @@ router.put('/testimonials/bulk', [
 
     const { items } = req.body;
 
-    // Use transaction to ensure data consistency
-    await prisma.$transaction(async (tx) => {
-      // Delete all existing testimonials
-      await tx.testimonial.deleteMany();
+    // Delete all existing testimonials first
+    await prisma.testimonial.deleteMany();
 
-      // Create new items
-      if (items.length > 0) {
-        await tx.testimonial.createMany({
-          data: items.map((item, index) => ({
-            text: item.text,
-            author: item.author,
-            company: item.company,
-            avatar: item.avatar || null,
-            order: item.order || index + 1
-          }))
-        });
-      }
-    });
+    // Create new items
+    if (items.length > 0) {
+      await prisma.testimonial.createMany({
+        data: items.map((item, index) => ({
+          text: item.text,
+          author: item.author,
+          company: item.company,
+          avatar: item.avatar || null,
+          order: item.order || index + 1
+        }))
+      });
+    }
 
     res.json({ message: 'Testimonials updated successfully' });
   } catch (error) {
