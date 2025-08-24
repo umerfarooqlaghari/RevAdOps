@@ -13,7 +13,7 @@ const adminAuth = (req, res, next) => {
   next();
 };
 
-// Get all content for homepage sections (specific route first)
+// SPECIFIC ROUTES FIRST - Get all content for homepage sections
 router.get('/homepage/all', authenticateToken, adminAuth, async (req, res) => {
   try {
     const sections = [
@@ -54,6 +54,71 @@ router.get('/homepage/all', authenticateToken, adminAuth, async (req, res) => {
   }
 });
 
+// Bulk update homepage content - SPECIFIC ROUTE
+router.put('/homepage/bulk', [
+  authenticateToken,
+  adminAuth,
+  body('updates').isArray().withMessage('Updates must be an array')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { updates } = req.body;
+    const results = [];
+
+    for (const update of updates) {
+      const { section, key, value, type = 'text', metadata = {}, order = 0 } = update;
+
+      try {
+        const content = await prisma.content.upsert({
+          where: {
+            section_key: {
+              section: `homepage_${section}`,
+              key: key
+            }
+          },
+          update: {
+            value,
+            type,
+            metadata,
+            order,
+            updatedAt: new Date()
+          },
+          create: {
+            section: `homepage_${section}`,
+            key,
+            value,
+            type,
+            metadata,
+            order
+          }
+        });
+
+        results.push({ success: true, content });
+      } catch (error) {
+        results.push({
+          success: false,
+          error: error.message,
+          section,
+          key
+        });
+      }
+    }
+
+    res.json({
+      message: 'Bulk update completed',
+      results
+    });
+  } catch (error) {
+    console.error('Bulk update error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// PARAMETERIZED ROUTES AFTER SPECIFIC ROUTES
 // Get all content for a specific page
 router.get('/content/:page', authenticateToken, adminAuth, async (req, res) => {
   try {
@@ -197,69 +262,7 @@ router.delete('/content/:page/:section/:key', authenticateToken, adminAuth, asyn
   }
 });
 
-// Bulk update homepage content
-router.put('/homepage/bulk', [
-  authenticateToken,
-  adminAuth,
-  body('updates').isArray().withMessage('Updates must be an array')
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
 
-    const { updates } = req.body;
-    const results = [];
-
-    for (const update of updates) {
-      const { section, key, value, type = 'text', metadata = {}, order = 0 } = update;
-      
-      try {
-        const content = await prisma.content.upsert({
-          where: {
-            section_key: {
-              section: `homepage_${section}`,
-              key: key
-            }
-          },
-          update: {
-            value,
-            type,
-            metadata,
-            order,
-            updatedAt: new Date()
-          },
-          create: {
-            section: `homepage_${section}`,
-            key,
-            value,
-            type,
-            metadata,
-            order
-          }
-        });
-        
-        results.push({ success: true, content });
-      } catch (error) {
-        results.push({ 
-          success: false, 
-          error: error.message,
-          section,
-          key 
-        });
-      }
-    }
-
-    res.json({ 
-      message: 'Bulk update completed',
-      results 
-    });
-  } catch (error) {
-    console.error('Bulk update error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
 // Expertise Management Routes
 // Get all expertise items (public endpoint)
