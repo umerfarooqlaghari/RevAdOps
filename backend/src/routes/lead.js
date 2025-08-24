@@ -105,7 +105,7 @@ router.get('/admin/all', authenticateToken, async (req, res) => {
   }
 });
 
-// Get lead statistics (admin)
+// Get lead statistics (admin) - MOVED BEFORE parameterized routes
 router.get('/admin/stats', authenticateToken, async (req, res) => {
   try {
     const [
@@ -160,7 +160,76 @@ router.get('/admin/stats', authenticateToken, async (req, res) => {
   }
 });
 
-// Get lead by ID (admin)
+// Export leads to CSV (admin) - MOVED BEFORE parameterized routes
+router.get('/admin/export', authenticateToken, async (req, res) => {
+  try {
+    const { status, source, startDate, endDate } = req.query;
+
+    const where = {
+      ...(status && { status }),
+      ...(source && { source }),
+      ...(startDate && endDate && {
+        createdAt: {
+          gte: new Date(startDate),
+          lte: new Date(endDate)
+        }
+      })
+    };
+
+    const leads = await prisma.lead.findMany({
+      where,
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // Convert to CSV format
+    const csvHeader = 'Name,Email,Phone,Message,Source,Status,Created At\n';
+    const csvData = leads.map(lead =>
+      `"${lead.name}","${lead.email}","${lead.phone || ''}","${(lead.message || '').replace(/"/g, '""')}","${lead.source || ''}","${lead.status}","${lead.createdAt.toISOString()}"`
+    ).join('\n');
+
+    const csv = csvHeader + csvData;
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=leads.csv');
+    res.send(csv);
+  } catch (error) {
+    console.error('Export leads error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get newsletter subscribers (admin) - MOVED BEFORE parameterized routes
+router.get('/admin/newsletter', authenticateToken, async (req, res) => {
+  try {
+    const { page = 1, limit = 20 } = req.query;
+    const skip = (page - 1) * limit;
+
+    const [subscribers, total] = await Promise.all([
+      prisma.newsletter.findMany({
+        where: { isActive: true },
+        orderBy: { createdAt: 'desc' },
+        skip: parseInt(skip),
+        take: parseInt(limit)
+      }),
+      prisma.newsletter.count({ where: { isActive: true } })
+    ]);
+
+    res.json({
+      subscribers,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get newsletter subscribers error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get lead by ID (admin) - MOVED AFTER all specific routes
 router.get('/admin/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -236,75 +305,6 @@ router.delete('/admin/:id', authenticateToken, async (req, res) => {
     res.json({ message: 'Lead deleted successfully' });
   } catch (error) {
     console.error('Delete lead error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Export leads to CSV (admin)
-router.get('/admin/export', authenticateToken, async (req, res) => {
-  try {
-    const { status, source, startDate, endDate } = req.query;
-
-    const where = {
-      ...(status && { status }),
-      ...(source && { source }),
-      ...(startDate && endDate && {
-        createdAt: {
-          gte: new Date(startDate),
-          lte: new Date(endDate)
-        }
-      })
-    };
-
-    const leads = await prisma.lead.findMany({
-      where,
-      orderBy: { createdAt: 'desc' }
-    });
-
-    // Convert to CSV format
-    const csvHeader = 'Name,Email,Phone,Message,Source,Status,Created At\n';
-    const csvData = leads.map(lead => 
-      `"${lead.name}","${lead.email}","${lead.phone || ''}","${(lead.message || '').replace(/"/g, '""')}","${lead.source || ''}","${lead.status}","${lead.createdAt.toISOString()}"`
-    ).join('\n');
-
-    const csv = csvHeader + csvData;
-
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename=leads.csv');
-    res.send(csv);
-  } catch (error) {
-    console.error('Export leads error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Get newsletter subscribers (admin)
-router.get('/admin/newsletter', authenticateToken, async (req, res) => {
-  try {
-    const { page = 1, limit = 20 } = req.query;
-    const skip = (page - 1) * limit;
-
-    const [subscribers, total] = await Promise.all([
-      prisma.newsletter.findMany({
-        where: { isActive: true },
-        orderBy: { createdAt: 'desc' },
-        skip: parseInt(skip),
-        take: parseInt(limit)
-      }),
-      prisma.newsletter.count({ where: { isActive: true } })
-    ]);
-
-    res.json({
-      subscribers,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    });
-  } catch (error) {
-    console.error('Get newsletter subscribers error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
