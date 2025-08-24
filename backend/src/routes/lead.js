@@ -105,6 +105,61 @@ router.get('/admin/all', authenticateToken, async (req, res) => {
   }
 });
 
+// Get lead statistics (admin)
+router.get('/admin/stats', authenticateToken, async (req, res) => {
+  try {
+    const [
+      totalLeads,
+      newLeads,
+      contactedLeads,
+      convertedLeads,
+      closedLeads,
+      newsletterSubscribers
+    ] = await Promise.all([
+      prisma.lead.count(),
+      prisma.lead.count({ where: { status: 'new' } }),
+      prisma.lead.count({ where: { status: 'contacted' } }),
+      prisma.lead.count({ where: { status: 'converted' } }),
+      prisma.lead.count({ where: { status: 'closed' } }),
+      prisma.newsletter.count({ where: { isActive: true } })
+    ]);
+
+    // Get leads by source
+    const leadsBySource = await prisma.lead.groupBy({
+      by: ['source'],
+      _count: {
+        source: true
+      }
+    });
+
+    // Get recent leads (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const recentLeads = await prisma.lead.count({
+      where: {
+        createdAt: {
+          gte: thirtyDaysAgo
+        }
+      }
+    });
+
+    res.json({
+      totalLeads,
+      newLeads,
+      contactedLeads,
+      convertedLeads,
+      closedLeads,
+      newsletterSubscribers,
+      recentLeads,
+      leadsBySource
+    });
+  } catch (error) {
+    console.error('Get lead stats error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Get lead by ID (admin)
 router.get('/admin/:id', authenticateToken, async (req, res) => {
   try {
@@ -181,61 +236,6 @@ router.delete('/admin/:id', authenticateToken, async (req, res) => {
     res.json({ message: 'Lead deleted successfully' });
   } catch (error) {
     console.error('Delete lead error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Get lead statistics (admin)
-router.get('/admin/stats', authenticateToken, async (req, res) => {
-  try {
-    const [
-      totalLeads,
-      newLeads,
-      contactedLeads,
-      convertedLeads,
-      closedLeads,
-      newsletterSubscribers
-    ] = await Promise.all([
-      prisma.lead.count(),
-      prisma.lead.count({ where: { status: 'new' } }),
-      prisma.lead.count({ where: { status: 'contacted' } }),
-      prisma.lead.count({ where: { status: 'converted' } }),
-      prisma.lead.count({ where: { status: 'closed' } }),
-      prisma.newsletter.count({ where: { isActive: true } })
-    ]);
-
-    // Get leads by source
-    const leadsBySource = await prisma.lead.groupBy({
-      by: ['source'],
-      _count: {
-        source: true
-      }
-    });
-
-    // Get recent leads (last 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const recentLeads = await prisma.lead.count({
-      where: {
-        createdAt: {
-          gte: thirtyDaysAgo
-        }
-      }
-    });
-
-    res.json({
-      totalLeads,
-      newLeads,
-      contactedLeads,
-      convertedLeads,
-      closedLeads,
-      newsletterSubscribers,
-      recentLeads,
-      leadsBySource
-    });
-  } catch (error) {
-    console.error('Get lead stats error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
