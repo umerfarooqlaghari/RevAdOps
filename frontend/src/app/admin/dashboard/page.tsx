@@ -155,7 +155,18 @@ export default function AdminDashboard() {
                 <p className="text-sm text-gray-600">Update homepage content and images</p>
               </div>
             </a>
-            
+
+            <a
+              href="/admin/about"
+              className="flex items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors duration-200"
+            >
+              <FileText className="h-5 w-5 text-orange-500 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">Edit About Page</p>
+                <p className="text-sm text-gray-600">Update about us content and director info</p>
+              </div>
+            </a>
+
             <a
               href="/admin/media"
               className="flex items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors duration-200"

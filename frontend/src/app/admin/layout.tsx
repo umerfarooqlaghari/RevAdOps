@@ -87,6 +87,7 @@ export default function AdminLayout({
   const navigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: Home },
     { name: 'Homepage Content', href: '/admin/homepage', icon: FileText },
+    { name: 'About Us Content', href: '/admin/about', icon: FileText },
     { name: 'Media Library', href: '/admin/media', icon: Image },
     { name: 'Leads', href: '/admin/leads', icon: Users },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },

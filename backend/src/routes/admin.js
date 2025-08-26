@@ -293,25 +293,50 @@ router.put('/expertise/bulk', [
 
     const { items } = req.body;
 
-    // Delete all existing expertise items first
-    await prisma.expertise.deleteMany();
-
-    // Create new items
-    if (items.length > 0) {
-      await prisma.expertise.createMany({
-        data: items.map((item, index) => ({
-          title: item.title,
-          description: item.description,
-          icon: item.icon,
-          order: item.order || index + 1
-        }))
-      });
+    // Check if prisma client is properly initialized
+    if (!prisma || !prisma.expertise) {
+      console.error('Prisma client not properly initialized');
+      return res.status(500).json({ message: 'Database connection error' });
     }
 
-    res.json({ message: 'Expertise items updated successfully' });
+    // Use transaction for atomic operation
+    await prisma.$transaction(async (tx) => {
+      // Delete all existing expertise items first
+      await tx.expertise.deleteMany();
+
+      // Create new items if any
+      if (items && items.length > 0) {
+        const validItems = items.filter(item => item.title && item.description);
+
+        if (validItems.length > 0) {
+          await tx.expertise.createMany({
+            data: validItems.map((item, index) => ({
+              title: item.title.trim(),
+              description: item.description.trim(),
+              icon: item.icon || '',
+              order: item.order || index + 1
+            }))
+          });
+        }
+      }
+    });
+
+    res.json({
+      message: 'Expertise items updated successfully',
+      count: items ? items.length : 0
+    });
   } catch (error) {
     console.error('Bulk update expertise error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      prismaAvailable: !!prisma,
+      expertiseAvailable: !!(prisma && prisma.expertise)
+    });
+    res.status(500).json({
+      message: 'Server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
   }
 });
 
