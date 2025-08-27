@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import DynamicBlogHeroSection from '@/components/DynamicBlogHeroSection';
 import DynamicBlogCategoriesSection from '@/components/DynamicBlogCategoriesSection';
 import DynamicBlogListSection from '@/components/DynamicBlogListSection';
@@ -25,6 +27,8 @@ export default function BlogPage() {
     cta: {}
   });
   const [loading, setLoading] = useState(true);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -53,7 +57,7 @@ export default function BlogPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -61,7 +65,7 @@ export default function BlogPage() {
 
   if (!content) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Content Not Available</h1>
           <p className="text-gray-600">Unable to load blog content.</p>
@@ -71,11 +75,27 @@ export default function BlogPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <DynamicBlogHeroSection content={content.hero} />
-      <DynamicBlogCategoriesSection content={content.categories} />
-      <DynamicBlogListSection content={content.blog_list} />
-      <DynamicBlogCTASection content={content.cta} />
+    <div className="min-h-screen bg-white">
+      <Header />
+      <main className="bg-white">
+        <DynamicBlogHeroSection
+          content={{
+            ...content.hero,
+            onSearchResults: (results: any[], query: string) => {
+              setSearchResults(results);
+              setSearchQuery(query);
+            }
+          }}
+        />
+        <DynamicBlogCategoriesSection content={content.categories} />
+        <DynamicBlogListSection
+          content={content.blog_list}
+          searchResults={searchResults.length > 0 || searchQuery ? searchResults : undefined}
+          searchQuery={searchQuery}
+        />
+        <DynamicBlogCTASection content={content.cta} />
+      </main>
+      <Footer />
     </div>
   );
 }
