@@ -55,11 +55,31 @@ router.get('/', async (req, res) => {
 // Admin routes - Get all blogs (admin)
 router.get('/admin/all', authenticateToken, async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, search, status, category } = req.query;
     const skip = (page - 1) * limit;
+
+    // Build where clause for filtering
+    const where = {};
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { content: { contains: search, mode: 'insensitive' } },
+        { author: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (category) {
+      where.categoryId = category;
+    }
 
     const [blogs, total] = await Promise.all([
       prisma.blog.findMany({
+        where,
         include: {
           category: true
         },
@@ -67,7 +87,7 @@ router.get('/admin/all', authenticateToken, async (req, res) => {
         skip: parseInt(skip),
         take: parseInt(limit)
       }),
-      prisma.blog.count()
+      prisma.blog.count({ where })
     ]);
 
     res.json({
@@ -232,6 +252,29 @@ router.delete('/categories/:id', authenticateToken, async (req, res) => {
 });
 
 // PARAMETERIZED ROUTES AFTER SPECIFIC ROUTES
+// Get single blog by ID (admin)
+router.get('/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const blog = await prisma.blog.findUnique({
+      where: { id },
+      include: {
+        category: true
+      }
+    });
+
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+
+    res.json(blog);
+  } catch (error) {
+    console.error('Get blog by ID error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Get single blog by slug (public)
 router.get('/post/:slug', async (req, res) => {
   try {
@@ -255,6 +298,36 @@ router.get('/post/:slug', async (req, res) => {
   }
 });
 
+// Increment view count for a blog post
+router.post('/post/:slug/view', async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    const blog = await prisma.blog.findUnique({
+      where: { slug }
+    });
+
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+
+    // Increment view count
+    await prisma.blog.update({
+      where: { slug },
+      data: {
+        viewCount: {
+          increment: 1
+        }
+      }
+    });
+
+    res.json({ message: 'View count updated' });
+  } catch (error) {
+    console.error('Update view count error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Create blog (admin)
 router.post('/', authenticateToken, [
   body('title').notEmpty().trim(),
@@ -263,6 +336,9 @@ router.post('/', authenticateToken, [
   body('excerpt').optional().trim(),
   body('categoryId').optional().isString(),
   body('tags').optional().isArray(),
+  body('author').optional().trim(),
+  body('metaDescription').optional().trim(),
+  body('status').optional().isIn(['draft', 'published', 'archived']),
   body('featuredImage').optional().custom((value) => {
     if (!value || value === '' || value === null) return true; // Allow empty strings and null
     return /^https?:\/\/.+/.test(value); // Validate URL format if not empty
@@ -274,7 +350,20 @@ router.post('/', authenticateToken, [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { title, content, slug, excerpt, categoryId, tags, featuredImage, isPublished } = req.body;
+    const {
+      title,
+      content,
+      slug,
+      excerpt,
+      categoryId,
+      tags,
+      featuredImage,
+      author,
+      metaDescription,
+      status,
+      isPublished,
+      publishedAt
+    } = req.body;
 
     // Check if slug already exists
     const existingBlog = await prisma.blog.findUnique({
@@ -291,11 +380,15 @@ router.post('/', authenticateToken, [
         content,
         slug,
         excerpt,
-        categoryId,
+        categoryId: categoryId || null,
         tags: tags || [],
         featuredImage,
+        author: author || 'RevAdOps Team',
+        metaDescription: metaDescription || excerpt || title,
+        status: status || 'draft',
         isPublished: isPublished || false,
-        publishedAt: isPublished ? new Date() : null
+        publishedAt: (isPublished && publishedAt) ? new Date(publishedAt) : (isPublished ? new Date() : null),
+        viewCount: 0
       },
       include: {
         category: true
@@ -316,7 +409,20 @@ router.post('/', authenticateToken, [
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, slug, excerpt, categoryId, tags, featuredImage, isPublished } = req.body;
+    const {
+      title,
+      content,
+      slug,
+      excerpt,
+      categoryId,
+      tags,
+      featuredImage,
+      author,
+      metaDescription,
+      status,
+      isPublished,
+      publishedAt
+    } = req.body;
 
     // Check if blog exists
     const existingBlog = await prisma.blog.findUnique({
@@ -343,13 +449,17 @@ router.put('/:id', authenticateToken, async (req, res) => {
       ...(content && { content }),
       ...(slug && { slug }),
       ...(excerpt !== undefined && { excerpt }),
-      ...(categoryId !== undefined && { categoryId }),
+      ...(categoryId !== undefined && { categoryId: categoryId || null }),
       ...(tags && { tags }),
       ...(featuredImage !== undefined && { featuredImage }),
-      ...(isPublished !== undefined && { 
+      ...(author !== undefined && { author }),
+      ...(metaDescription !== undefined && { metaDescription }),
+      ...(status !== undefined && { status }),
+      ...(isPublished !== undefined && {
         isPublished,
         publishedAt: isPublished && !existingBlog.publishedAt ? new Date() : existingBlog.publishedAt
-      })
+      }),
+      ...(publishedAt && { publishedAt: new Date(publishedAt) })
     };
 
     const blog = await prisma.blog.update({

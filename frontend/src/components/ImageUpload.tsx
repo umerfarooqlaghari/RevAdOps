@@ -1,7 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { Upload, X, Image as ImageIcon, Link, AlertCircle } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Link, AlertCircle, FolderOpen } from 'lucide-react';
 
 interface ImageUploadProps {
   value: string;
@@ -9,6 +12,19 @@ interface ImageUploadProps {
   label?: string;
   placeholder?: string;
   className?: string;
+}
+
+interface MediaAsset {
+  id: string;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  width?: number;
+  height?: number;
+  cloudinaryUrl: string;
+  createdAt: string;
+  altText?: string;
 }
 
 interface ImageDimensions {
@@ -27,7 +43,10 @@ export default function ImageUpload({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [dimensions, setDimensions] = useState<ImageDimensions | null>(null);
-  const [inputMode, setInputMode] = useState<'url' | 'upload'>('url');
+  const [inputMode, setInputMode] = useState<'url' | 'upload' | 'gallery'>('url');
+  const [showGallery, setShowGallery] = useState(false);
+  const [galleryAssets, setGalleryAssets] = useState<MediaAsset[]>([]);
+  const [loadingGallery, setLoadingGallery] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get image dimensions
@@ -135,6 +154,41 @@ export default function ImageUpload({
     }
   };
 
+  // Fetch gallery assets
+  const fetchGalleryAssets = async () => {
+    setLoadingGallery(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/admin/assets`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setGalleryAssets(data.assets || []);
+      }
+    } catch (error) {
+      console.error('Error fetching gallery assets:', error);
+    } finally {
+      setLoadingGallery(false);
+    }
+  };
+
+  // Open gallery
+  const openGallery = () => {
+    setShowGallery(true);
+    fetchGalleryAssets();
+  };
+
+  // Select from gallery
+  const selectFromGallery = (asset: MediaAsset) => {
+    onChange(asset.cloudinaryUrl);
+    updateDimensions(asset.cloudinaryUrl);
+    setShowGallery(false);
+  };
+
   // Clear image
   const clearImage = () => {
     onChange('');
@@ -191,6 +245,14 @@ export default function ImageUpload({
           >
             <Upload className="h-3 w-3 inline mr-1" />
             Upload
+          </button>
+          <button
+            type="button"
+            onClick={openGallery}
+            className="px-3 py-1 text-xs rounded-md transition-colors bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200"
+          >
+            <FolderOpen className="h-3 w-3 inline mr-1" />
+            Gallery
           </button>
         </div>
       </div>
@@ -280,6 +342,55 @@ export default function ImageUpload({
             >
               <X className="h-3 w-3" />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Gallery Modal */}
+      {showGallery && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-gray-900">Choose from Gallery</h3>
+              <button
+                onClick={() => setShowGallery(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            {loadingGallery ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+            ) : galleryAssets.length === 0 ? (
+              <div className="text-center py-12">
+                <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <p className="text-gray-500">No images found in gallery</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
+                {galleryAssets.filter(asset => asset.mimeType.startsWith('image/')).map((asset) => (
+                  <div
+                    key={asset.id}
+                    className="relative cursor-pointer group"
+                    onClick={() => selectFromGallery(asset)}
+                  >
+                    <img
+                      src={asset.cloudinaryUrl}
+                      alt={asset.altText || asset.originalName}
+                      className="w-full h-24 object-cover rounded-lg border border-gray-200 group-hover:border-blue-500 transition-colors"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity rounded-lg flex items-center justify-center">
+                      <span className="text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                        Select
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
