@@ -1,7 +1,25 @@
 'use client';
 
-import { ArrowRight } from 'lucide-react';
+
 import BlogSearch from './BlogSearch';
+
+interface BlogPost {
+  id: string;
+  title: string;
+  excerpt?: string;
+  slug: string;
+  featuredImage?: string;
+  isPublished: boolean;
+  publishedAt?: string;
+  tags: string[];
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface BlogHeroProps {
   content: {
@@ -11,6 +29,7 @@ interface BlogHeroProps {
     background_image?: string;
     search_placeholder?: string;
     featured_categories?: string;
+    onSearchResults?: (results: BlogPost[], query: string) => void;
   };
 }
 
@@ -50,10 +69,10 @@ export default function DynamicBlogHeroSection({ content }: BlogHeroProps) {
           <div className="max-w-2xl mx-auto mb-12">
             <BlogSearch
               placeholder={content.search_placeholder || 'Search articles...'}
-              onSearchResults={(results, query) => {
-                // You can add additional handling here if needed
+              onSearchResults={content.onSearchResults || ((results, query) => {
+                // Default handling if no onSearchResults provided
                 console.log(`Found ${results.length} results for "${query}"`);
-              }}
+              })}
             />
           </div>
 

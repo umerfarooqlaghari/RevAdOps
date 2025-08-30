@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, ArrowRight, Mail } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface ArticleWidget {
   id: string;
@@ -195,13 +196,13 @@ export default function ArticleSidebar({ widgets }: ArticleSidebarProps) {
               ))}
             </div>
             <div className="mt-4 pt-4 border-t border-gray-200">
-              <a
+              <Link
                 href="/blog"
                 className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200"
               >
                 View all articles
                 <ArrowRight className="h-4 w-4 ml-1" />
-              </a>
+              </Link>
             </div>
           </div>
         );

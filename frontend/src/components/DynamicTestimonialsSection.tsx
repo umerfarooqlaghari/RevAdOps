@@ -84,7 +84,6 @@ const DynamicTestimonialsSection = ({ content, items }: DynamicTestimonialsSecti
     }
   ];
 
-  const itemsPerSlide = 1; // Show one testimonial at a time for better focus
   const totalSlides = testimonials.length;
 
   // Auto-advance slides

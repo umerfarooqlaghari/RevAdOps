@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, X, Clock, Calendar, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 
@@ -41,35 +41,7 @@ export default function BlogSearch({
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Debounced search
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (query.trim()) {
-        performSearch(query.trim());
-      } else {
-        setResults([]);
-        setShowResults(false);
-        setHasSearched(false);
-        onSearchResults?.([], '');
-      }
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [query]);
-
-  // Close results when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowResults(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const performSearch = async (searchQuery: string) => {
+  const performSearch = useCallback(async (searchQuery: string) => {
     setIsSearching(true);
     setHasSearched(true);
 
@@ -91,7 +63,35 @@ export default function BlogSearch({
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [onSearchResults]);
+
+  // Debounced search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (query.trim()) {
+        performSearch(query.trim());
+      } else {
+        setResults([]);
+        setShowResults(false);
+        setHasSearched(false);
+        onSearchResults?.([], '');
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [query, performSearch]);
+
+  // Close results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const clearSearch = () => {
     setQuery('');
@@ -169,7 +169,7 @@ export default function BlogSearch({
           {results.length > 0 ? (
             <div className="py-2">
               <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
-                Found {results.length} article{results.length !== 1 ? 's' : ''} for "{query}"
+                Found {results.length} article{results.length !== 1 ? 's' : ''} for &quot;{query}&quot;
               </div>
               {results.map((article) => (
                 <a
@@ -237,7 +237,7 @@ export default function BlogSearch({
           ) : hasSearched && !isSearching ? (
             <div className="px-4 py-8 text-center text-gray-500">
               <Search className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-              <p className="text-sm">No articles found for "{query}"</p>
+              <p className="text-sm">No articles found for &quot;{query}&quot;</p>
               <p className="text-xs mt-1">Try different keywords or check spelling</p>
             </div>
           ) : null}

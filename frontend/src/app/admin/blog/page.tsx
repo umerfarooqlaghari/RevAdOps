@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Eye, Plus, Trash2, Edit, FileText, Tag, Calendar } from 'lucide-react';
+import { Save, Eye, Trash2, Edit, FileText, Tag, Calendar } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 
 interface BlogCategory {

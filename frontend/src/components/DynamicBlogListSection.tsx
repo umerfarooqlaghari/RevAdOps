@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Calendar, User, ArrowRight, Clock } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Calendar, ArrowRight, Clock } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface BlogPost {
   id: string;
@@ -39,11 +40,7 @@ export default function DynamicBlogListSection({ content, searchResults, searchQ
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    fetchPosts();
-  }, [currentPage]);
-
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     try {
       const postsPerPage = parseInt(content.posts_per_page || '6');
       const response = await fetch(
@@ -60,7 +57,11 @@ export default function DynamicBlogListSection({ content, searchResults, searchQ
     } finally {
       setLoading(false);
     }
-  };
+  }, [content.posts_per_page, currentPage]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -157,13 +158,13 @@ export default function DynamicBlogListSection({ content, searchResults, searchQ
                     <span>{calculateReadTime(displayPosts[0].excerpt || '')}</span>
                   </div>
 
-                  <a
+                  <Link
                     href={`/blog/${displayPosts[0].slug}`}
                     className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors duration-200 group"
                   >
                     Read Full Article
                     <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
-                  </a>
+                  </Link>
                 </div>
 
                 <div className="relative h-64 lg:h-auto">
@@ -215,13 +216,13 @@ export default function DynamicBlogListSection({ content, searchResults, searchQ
                   <span>{calculateReadTime(post.excerpt || '')}</span>
                 </div>
 
-                <a
+                <Link
                   href={`/blog/${post.slug}`}
                   className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors duration-200 group"
                 >
                   Read More
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
-                </a>
+                </Link>
               </div>
             </article>
           ))}
@@ -233,7 +234,7 @@ export default function DynamicBlogListSection({ content, searchResults, searchQ
             <div className="max-w-md mx-auto">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">No articles found</h3>
               <p className="text-gray-600 mb-6">
-                We couldn't find any articles matching "{searchQuery}". Try different keywords or browse our categories.
+                We couldn&apos;t find any articles matching &quot;{searchQuery}&quot;. Try different keywords or browse our categories.
               </p>
             </div>
           </div>

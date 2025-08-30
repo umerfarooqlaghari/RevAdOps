@@ -19,6 +19,24 @@ interface BlogContent {
   cta: ContentSection;
 }
 
+interface BlogPost {
+  id: string;
+  title: string;
+  excerpt?: string;
+  slug: string;
+  featuredImage?: string;
+  isPublished: boolean;
+  publishedAt?: string;
+  tags: string[];
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function BlogPage() {
   const [content, setContent] = useState<BlogContent>({
     hero: {},
@@ -27,7 +45,7 @@ export default function BlogPage() {
     cta: {}
   });
   const [loading, setLoading] = useState(true);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<BlogPost[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -81,7 +99,7 @@ export default function BlogPage() {
         <DynamicBlogHeroSection
           content={{
             ...content.hero,
-            onSearchResults: (results: any[], query: string) => {
+            onSearchResults: (results: BlogPost[], query: string) => {
               setSearchResults(results);
               setSearchQuery(query);
             }

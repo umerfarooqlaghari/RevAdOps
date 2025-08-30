@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Eye, Type, Upload, Image as ImageIcon, Plus, Trash2, Target, MessageSquare } from 'lucide-react';
+import { Save, Eye, Type, Upload, Plus, Trash2, Target, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
 
 interface ContentItem {

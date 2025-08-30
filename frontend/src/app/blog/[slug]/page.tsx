@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ArticleHero from '@/components/ArticleHero';
@@ -117,12 +118,12 @@ export default function ArticlePage() {
             <p className="text-gray-600 mb-8">
               The article you&apos;re looking for doesn&apos;t exist or has been removed.
             </p>
-            <a
+            <Link
               href="/blog"
               className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
               Back to Blog
-            </a>
+            </Link>
           </div>
         </div>
         <Footer />
