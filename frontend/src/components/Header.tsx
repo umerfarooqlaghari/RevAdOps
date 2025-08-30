@@ -19,15 +19,16 @@ const Header = () => {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container-custom">
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-6">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
             <Image
-              src="/revadops-logo.png"
+              src="/logo.svg"
               alt="RevAdOps Logo"
-              width={120}
-              height={40}
-              className="h-10 w-auto"
+              width={180}
+              height={60}
+              className="h-16 w-auto transition-transform duration-200 hover:scale-105"
+              priority
             />
           </Link>
 
