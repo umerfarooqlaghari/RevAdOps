@@ -14,6 +14,7 @@ import serviceRoutes from './routes/service.js';
 import leadRoutes from './routes/lead.js';
 import uploadRoutes from './routes/upload.js';
 import adminRoutes from './routes/admin.js';
+import advertisementRoutes from './routes/advertisements.js';
 
 // Load environment variables
 dotenv.config();
@@ -56,6 +57,7 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/advertisements', advertisementRoutes);
 
 // Serve static files for local uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
