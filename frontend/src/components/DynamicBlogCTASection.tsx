@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Mail, Bell, BookOpen, Users } from 'lucide-react';
+import { ArrowRight, Mail, Bell, BookOpen } from 'lucide-react';
 import { useState } from 'react';
 
 interface BlogCTAProps {
@@ -38,20 +38,7 @@ export default function DynamicBlogCTASection({ content }: BlogCTAProps) {
     setEmail('');
   };
 
-  const stats = [
-    {
-      number: content.stats_1_number || '50K+',
-      label: content.stats_1_label || 'Newsletter Subscribers',
-    },
-    {
-      number: content.stats_2_number || '200+',
-      label: content.stats_2_label || 'Articles Published',
-    },
-    {
-      number: content.stats_3_number || '1M+',
-      label: content.stats_3_label || 'Monthly Readers',
-    },
-  ];
+
 
   return (
     <section 
@@ -64,10 +51,9 @@ export default function DynamicBlogCTASection({ content }: BlogCTAProps) {
     >
       <div className="absolute inset-0 bg-black opacity-20"></div>
       
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div>
           {/* Main CTA Content */}
-          <div>
             {content.subtitle && (
               <p className="text-white font-semibold text-lg mb-4">
                 {content.subtitle}
@@ -122,7 +108,7 @@ export default function DynamicBlogCTASection({ content }: BlogCTAProps) {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href={content.primary_cta_link || '/services'}
                 className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-900 font-semibold rounded-lg hover:bg-blue-50 transition-colors duration-200 group"
@@ -130,7 +116,7 @@ export default function DynamicBlogCTASection({ content }: BlogCTAProps) {
                 {content.primary_cta_text || 'Explore Our Services'}
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
               </a>
-              
+
               {content.secondary_cta_text && (
                 <a
                   href={content.secondary_cta_link || '/contact'}
@@ -141,47 +127,6 @@ export default function DynamicBlogCTASection({ content }: BlogCTAProps) {
                 </a>
               )}
             </div>
-          </div>
-
-          {/* Stats and Features */}
-          <div>
-            {/* Stats */}
-            <div className="grid grid-cols-1 gap-6 mb-8">
-              {stats.map((stat, index) => (
-                <div key={index} className="bg-white bg-opacity-10 rounded-lg p-6 text-center">
-                  <div className="text-3xl font-bold mb-2 text-white">{stat.number}</div>
-                  <div className="text-white">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Features */}
-            <div className="bg-white bg-opacity-10 rounded-2xl p-8">
-              <h3 className="text-xl font-bold mb-6 flex items-center">
-                <Users className="h-6 w-6 mr-3" />
-                What You&apos;ll Get
-              </h3>
-              
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
-                  <span className="text-blue-100">Weekly marketing insights</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
-                  <span className="text-blue-100">Exclusive industry reports</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
-                  <span className="text-blue-100">Early access to new content</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
-                  <span className="text-blue-100">Free marketing templates</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import Breadcrumbs from '@/components/Breadcrumbs';
+
 import { Calendar, Clock, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BlogPost {
@@ -137,11 +137,7 @@ export default function CategoryPage() {
     );
   }
 
-  const breadcrumbItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Blog', href: '/blog' },
-    { label: category.name, href: `/blog/category/${category.slug}` }
-  ];
+
 
   return (
     <div className="min-h-screen bg-white">
@@ -151,9 +147,7 @@ export default function CategoryPage() {
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white py-16">
           <div className="container-custom">
-            <div className="mb-8">
-              <Breadcrumbs items={breadcrumbItems} />
-            </div>
+
             
             <div className="text-center">
               <h1 className="text-4xl lg:text-5xl font-bold mb-4">
