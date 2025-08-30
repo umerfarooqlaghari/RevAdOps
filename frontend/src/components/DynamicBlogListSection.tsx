@@ -19,6 +19,7 @@ interface BlogPost {
     name: string;
     slug: string;
   };
+  customUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -37,30 +38,47 @@ interface BlogListProps {
 export default function DynamicBlogListSection({ content, searchResults, searchQuery }: BlogListProps) {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  const fetchPosts = useCallback(async () => {
+  const fetchPosts = useCallback(async (page = 1, append = false) => {
     try {
-      const postsPerPage = parseInt(content.posts_per_page || '6');
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
+
+      const postsPerPage = 10; // Always show 10 articles initially and load 10 more
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/blogs?page=${currentPage}&limit=${postsPerPage}`
+        `${process.env.NEXT_PUBLIC_API_URL}/blogs?page=${page}&limit=${postsPerPage}`
       );
 
       if (response.ok) {
         const data = await response.json();
-        setPosts(data.blogs || []);
+        const newPosts = data.blogs || [];
+
+        if (append) {
+          setPosts(prev => [...prev, ...newPosts]);
+        } else {
+          setPosts(newPosts);
+        }
+
         setTotalPages(data.pagination?.pages || 1);
+        setHasMore(page < (data.pagination?.pages || 1));
       }
     } catch (error) {
       console.error('Error fetching blog posts:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
-  }, [content.posts_per_page, currentPage]);
+  }, []);
 
   useEffect(() => {
-    fetchPosts();
+    fetchPosts(1, false);
   }, [fetchPosts]);
 
   const formatDate = (dateString: string) => {
@@ -79,8 +97,10 @@ export default function DynamicBlogListSection({ content, searchResults, searchQ
   };
 
   const loadMorePosts = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(prev => prev + 1);
+    if (hasMore && !loadingMore) {
+      const nextPage = currentPage + 1;
+      setCurrentPage(nextPage);
+      fetchPosts(nextPage, true);
     }
   };
 
@@ -128,61 +148,11 @@ export default function DynamicBlogListSection({ content, searchResults, searchQ
           )}
         </div>
 
-        {/* Featured Post */}
-        {content.show_featured !== 'false' && displayPosts.length > 0 && !isSearchMode && (
-          <div className="mb-16">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl overflow-hidden shadow-xl">
-              <div className="grid lg:grid-cols-2 gap-0">
-                <div className="p-8 lg:p-12 flex flex-col justify-center">
-                  <div className="flex items-center mb-4">
-                    <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                      Featured
-                    </span>
-                    {posts[0].category && (
-                      <span className="ml-3 text-blue-600 font-medium">{posts[0].category.name}</span>
-                    )}
-                  </div>
 
-                  <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                    {displayPosts[0].title}
-                  </h3>
 
-                  <p className="text-xl text-gray-600 mb-6 leading-relaxed">
-                    {displayPosts[0].excerpt || 'Discover insights and strategies to help you succeed in the digital advertising landscape.'}
-                  </p>
-
-                  <div className="flex items-center text-gray-500 mb-6">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span className="mr-4">{formatDate(displayPosts[0].publishedAt || displayPosts[0].createdAt)}</span>
-                    <Clock className="h-4 w-4 mr-2" />
-                    <span>{calculateReadTime(displayPosts[0].excerpt || '')}</span>
-                  </div>
-
-                  <Link
-                    href={`/blog/${displayPosts[0].slug}`}
-                    className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors duration-200 group"
-                  >
-                    Read Full Article
-                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
-                  </Link>
-                </div>
-
-                <div className="relative h-64 lg:h-auto">
-                  <Image
-                    src={displayPosts[0].featuredImage || '/api/placeholder/800/400'}
-                    alt={displayPosts[0].title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Regular Posts Grid */}
+        {/* Posts Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {displayPosts.slice(content.show_featured !== 'false' && !isSearchMode ? 1 : 0).map((post) => (
+          {displayPosts.map((post) => (
             <article key={post.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group hover:-translate-y-2">
               <div className="relative h-48 overflow-hidden">
                 <Image
@@ -216,13 +186,25 @@ export default function DynamicBlogListSection({ content, searchResults, searchQ
                   <span>{calculateReadTime(post.excerpt || '')}</span>
                 </div>
 
-                <Link
-                  href={`/blog/${post.slug}`}
-                  className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors duration-200 group"
-                >
-                  Read More
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
-                </Link>
+                {post.customUrl ? (
+                  <a
+                    href={post.customUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors duration-200 group"
+                  >
+                    Read More
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
+                  </a>
+                ) : (
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors duration-200 group"
+                  >
+                    Read More
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
+                  </Link>
+                )}
               </div>
             </article>
           ))}
@@ -241,14 +223,14 @@ export default function DynamicBlogListSection({ content, searchResults, searchQ
         )}
 
         {/* Load More Button */}
-        {currentPage < totalPages && !isSearchMode && (
+        {hasMore && !isSearchMode && (
           <div className="text-center mt-12">
             <button
               onClick={loadMorePosts}
-              disabled={loading}
+              disabled={loadingMore}
               className="px-8 py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Loading...' : 'Load More Articles'}
+              {loadingMore ? 'Loading...' : 'Load More Articles'}
             </button>
           </div>
         )}

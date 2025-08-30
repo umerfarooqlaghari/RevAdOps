@@ -152,9 +152,10 @@ export default function DynamicBlogCategoriesSection({ content }: BlogCategories
                         const IconComponent = iconMap[iconKey];
 
                         return (
-                          <div
+                          <a
                             key={category.id}
-                            className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 group hover:-translate-y-2 cursor-pointer"
+                            href={`/blog/category/${category.slug}`}
+                            className="block bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 group hover:-translate-y-2 cursor-pointer"
                           >
                             <div className="flex items-center justify-between mb-6">
                               <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-lg group-hover:bg-blue-600 transition-colors duration-300">
@@ -178,7 +179,7 @@ export default function DynamicBlogCategoriesSection({ content }: BlogCategories
                               View Articles
                               <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
                             </div>
-                          </div>
+                          </a>
                         );
                       })}
                   </div>

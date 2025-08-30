@@ -17,6 +17,7 @@ interface BlogPost {
     name: string;
     slug: string;
   };
+  customUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -34,9 +35,6 @@ interface BlogHeroProps {
 }
 
 export default function DynamicBlogHeroSection({ content }: BlogHeroProps) {
-  const categories = content.featured_categories ?
-    content.featured_categories.split(',').map(c => c.trim()) :
-    ['SEO', 'PPC', 'Social Media', 'Content Marketing'];
 
   return (
     <section 
@@ -66,7 +64,7 @@ export default function DynamicBlogHeroSection({ content }: BlogHeroProps) {
           </p>
 
           {/* Search Bar */}
-          <div className="max-w-2xl mx-auto mb-12">
+          <div className="max-w-2xl mx-auto">
             <BlogSearch
               placeholder={content.search_placeholder || 'Search articles...'}
               onSearchResults={content.onSearchResults || ((results, query) => {
@@ -74,19 +72,6 @@ export default function DynamicBlogHeroSection({ content }: BlogHeroProps) {
                 console.log(`Found ${results.length} results for "${query}"`);
               })}
             />
-          </div>
-
-          {/* Featured Categories */}
-          <div className="flex flex-wrap justify-center gap-4">
-            <span className="text-blue-200 mr-4">Popular topics:</span>
-            {categories.map((category, index) => (
-              <button
-                key={index}
-                className="px-4 py-2 bg-white bg-opacity-10 text-blue-100 rounded-full hover:bg-opacity-20 transition-colors duration-200"
-              >
-                {category}
-              </button>
-            ))}
           </div>
         </div>
       </div>

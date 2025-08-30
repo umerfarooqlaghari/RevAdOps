@@ -33,6 +33,7 @@ interface BlogPost {
     name: string;
     slug: string;
   };
+  customUrl?: string;
   createdAt: string;
   updatedAt: string;
 }

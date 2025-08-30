@@ -69,29 +69,29 @@ export default function DynamicBlogCTASection({ content }: BlogCTAProps) {
           {/* Main CTA Content */}
           <div>
             {content.subtitle && (
-              <p className="text-blue-200 font-semibold text-lg mb-4">
+              <p className="text-white font-semibold text-lg mb-4">
                 {content.subtitle}
               </p>
             )}
-            
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+
+            <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-white">
               {content.title || 'Stay Updated with Our Latest Insights'}
             </h2>
-            
-            <p className="text-xl text-blue-100 mb-8 leading-relaxed">
+
+            <p className="text-xl text-white mb-8 leading-relaxed">
               {content.description || 'Get the latest digital marketing tips, strategies, and industry insights delivered straight to your inbox.'}
             </p>
 
             {/* Newsletter Signup */}
             <div className="bg-white bg-opacity-10 rounded-2xl p-8 mb-8">
               <div className="flex items-center mb-4">
-                <Bell className="h-6 w-6 text-blue-200 mr-3" />
-                <h3 className="text-xl font-bold">
+                <Bell className="h-6 w-6 text-white mr-3" />
+                <h3 className="text-xl font-bold text-white">
                   {content.newsletter_title || 'Subscribe to Our Newsletter'}
                 </h3>
               </div>
-              
-              <p className="text-blue-100 mb-6">
+
+              <p className="text-white mb-6">
                 {content.newsletter_description || 'Join thousands of marketers who trust our insights.'}
               </p>
 
@@ -149,8 +149,8 @@ export default function DynamicBlogCTASection({ content }: BlogCTAProps) {
             <div className="grid grid-cols-1 gap-6 mb-8">
               {stats.map((stat, index) => (
                 <div key={index} className="bg-white bg-opacity-10 rounded-lg p-6 text-center">
-                  <div className="text-3xl font-bold mb-2">{stat.number}</div>
-                  <div className="text-blue-200">{stat.label}</div>
+                  <div className="text-3xl font-bold mb-2 text-white">{stat.number}</div>
+                  <div className="text-white">{stat.label}</div>
                 </div>
               ))}
             </div>

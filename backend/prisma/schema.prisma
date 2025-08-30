@@ -101,6 +101,9 @@ model Blog {
   categoryId    String?
   category      BlogCategory? @relation(fields: [categoryId], references: [id])
   viewCount     Int           @default(0)
+  customUrl     String?       // Optional custom URL for external redirects
+  advertisement1 String?      // First advertisement image URL
+  advertisement2 String?      // Second advertisement image URL
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 

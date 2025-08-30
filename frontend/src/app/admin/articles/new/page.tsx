@@ -25,6 +25,9 @@ interface ArticleForm {
   status: string;
   categoryId: string;
   tags: string[];
+  customUrl: string;
+  advertisement1: string;
+  advertisement2: string;
 }
 
 export default function NewArticle() {
@@ -32,6 +35,8 @@ export default function NewArticle() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingAd1, setUploadingAd1] = useState(false);
+  const [uploadingAd2, setUploadingAd2] = useState(false);
   const [tagInput, setTagInput] = useState('');
   
   const [form, setForm] = useState<ArticleForm>({
@@ -44,7 +49,10 @@ export default function NewArticle() {
     metaDescription: '',
     status: 'draft',
     categoryId: '',
-    tags: []
+    tags: [],
+    customUrl: '',
+    advertisement1: '',
+    advertisement2: ''
   });
 
   useEffect(() => {
@@ -107,6 +115,66 @@ export default function NewArticle() {
       alert('Error uploading image');
     } finally {
       setUploadingImage(false);
+    }
+  };
+
+  const handleAdvertisement1Upload = async (file: File) => {
+    setUploadingAd1(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('section', 'articles');
+      formData.append('key', 'advertisement1');
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/admin/image`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setForm(prev => ({ ...prev, advertisement1: data.url }));
+        alert('Advertisement 1 uploaded successfully!');
+      } else {
+        alert('Failed to upload advertisement 1');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload advertisement 1');
+    } finally {
+      setUploadingAd1(false);
+    }
+  };
+
+  const handleAdvertisement2Upload = async (file: File) => {
+    setUploadingAd2(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('section', 'articles');
+      formData.append('key', 'advertisement2');
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/admin/image`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setForm(prev => ({ ...prev, advertisement2: data.url }));
+        alert('Advertisement 2 uploaded successfully!');
+      } else {
+        alert('Failed to upload advertisement 2');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload advertisement 2');
+    } finally {
+      setUploadingAd2(false);
     }
   };
 
@@ -231,6 +299,23 @@ export default function NewArticle() {
               />
               <p className="text-sm text-gray-500 mt-1">
                 URL: /blog/{form.slug}
+              </p>
+            </div>
+
+            {/* Custom URL */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Custom Article URL
+              </label>
+              <input
+                type="url"
+                value={form.customUrl}
+                onChange={(e) => setForm(prev => ({ ...prev, customUrl: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                placeholder="https://example.com/custom-article-url"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Optional: If provided, clicking on this article will redirect to this URL instead of the default article page.
               </p>
             </div>
 
@@ -400,6 +485,94 @@ export default function NewArticle() {
                     </span>
                   ))}
                 </div>
+              </div>
+            </div>
+
+            {/* Advertisement 1 */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Advertisement 1</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <input
+                    type="text"
+                    value={form.advertisement1}
+                    onChange={(e) => setForm(prev => ({ ...prev, advertisement1: e.target.value }))}
+                    placeholder="Advertisement 1 Image URL"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  />
+                </div>
+
+                <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-blue-300 rounded-md shadow-sm text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 w-full justify-center">
+                  <Upload className="h-4 w-4 mr-2" />
+                  {uploadingAd1 ? 'Uploading...' : 'Upload Advertisement 1'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleAdvertisement1Upload(file);
+                    }}
+                    className="hidden"
+                    disabled={uploadingAd1}
+                  />
+                </label>
+
+                {form.advertisement1 && (
+                  <div className="relative w-full h-32 border border-gray-300 rounded-md overflow-hidden">
+                    <Image
+                      src={form.advertisement1}
+                      alt="Advertisement 1 preview"
+                      fill
+                      className="object-cover"
+                      sizes="300px"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Advertisement 2 */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Advertisement 2</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <input
+                    type="text"
+                    value={form.advertisement2}
+                    onChange={(e) => setForm(prev => ({ ...prev, advertisement2: e.target.value }))}
+                    placeholder="Advertisement 2 Image URL"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  />
+                </div>
+
+                <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-blue-300 rounded-md shadow-sm text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 w-full justify-center">
+                  <Upload className="h-4 w-4 mr-2" />
+                  {uploadingAd2 ? 'Uploading...' : 'Upload Advertisement 2'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleAdvertisement2Upload(file);
+                    }}
+                    className="hidden"
+                    disabled={uploadingAd2}
+                  />
+                </label>
+
+                {form.advertisement2 && (
+                  <div className="relative w-full h-32 border border-gray-300 rounded-md overflow-hidden">
+                    <Image
+                      src={form.advertisement2}
+                      alt="Advertisement 2 preview"
+                      fill
+                      className="object-cover"
+                      sizes="300px"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 

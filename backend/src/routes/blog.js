@@ -342,6 +342,18 @@ router.post('/', authenticateToken, [
   body('featuredImage').optional().custom((value) => {
     if (!value || value === '' || value === null) return true; // Allow empty strings and null
     return /^https?:\/\/.+/.test(value); // Validate URL format if not empty
+  }),
+  body('customUrl').optional().custom((value) => {
+    if (!value || value === '' || value === null) return true; // Allow empty strings and null
+    return /^https?:\/\/.+/.test(value); // Validate URL format if not empty
+  }),
+  body('advertisement1').optional().custom((value) => {
+    if (!value || value === '' || value === null) return true; // Allow empty strings and null
+    return /^https?:\/\/.+/.test(value); // Validate URL format if not empty
+  }),
+  body('advertisement2').optional().custom((value) => {
+    if (!value || value === '' || value === null) return true; // Allow empty strings and null
+    return /^https?:\/\/.+/.test(value); // Validate URL format if not empty
   })
 ], async (req, res) => {
   try {
@@ -362,7 +374,10 @@ router.post('/', authenticateToken, [
       metaDescription,
       status,
       isPublished,
-      publishedAt
+      publishedAt,
+      customUrl,
+      advertisement1,
+      advertisement2
     } = req.body;
 
     // Check if slug already exists
@@ -388,7 +403,10 @@ router.post('/', authenticateToken, [
         status: status || 'draft',
         isPublished: isPublished || false,
         publishedAt: (isPublished && publishedAt) ? new Date(publishedAt) : (isPublished ? new Date() : null),
-        viewCount: 0
+        viewCount: 0,
+        customUrl: customUrl || null,
+        advertisement1: advertisement1 || null,
+        advertisement2: advertisement2 || null
       },
       include: {
         category: true
@@ -421,7 +439,10 @@ router.put('/:id', authenticateToken, async (req, res) => {
       metaDescription,
       status,
       isPublished,
-      publishedAt
+      publishedAt,
+      customUrl,
+      advertisement1,
+      advertisement2
     } = req.body;
 
     // Check if blog exists
@@ -455,6 +476,9 @@ router.put('/:id', authenticateToken, async (req, res) => {
       ...(author !== undefined && { author }),
       ...(metaDescription !== undefined && { metaDescription }),
       ...(status !== undefined && { status }),
+      ...(customUrl !== undefined && { customUrl: customUrl || null }),
+      ...(advertisement1 !== undefined && { advertisement1: advertisement1 || null }),
+      ...(advertisement2 !== undefined && { advertisement2: advertisement2 || null }),
       ...(isPublished !== undefined && {
         isPublished,
         publishedAt: isPublished && !existingBlog.publishedAt ? new Date() : existingBlog.publishedAt

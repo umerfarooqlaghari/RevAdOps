@@ -12,7 +12,8 @@ import {
   BarChart3,
   LogOut,
   Menu,
-  X
+  X,
+  Tag
 } from 'lucide-react';
 
 interface AdminUser {
@@ -89,6 +90,7 @@ export default function AdminLayout({
     { name: 'Homepage Content', href: '/admin/homepage', icon: FileText },
     { name: 'About Us Content', href: '/admin/about', icon: FileText },
     { name: 'Articles', href: '/admin/articles', icon: FileText },
+    { name: 'Categories', href: '/admin/categories', icon: Tag },
     { name: 'Media Library', href: '/admin/media', icon: Image },
     { name: 'Leads', href: '/admin/leads', icon: Users },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },

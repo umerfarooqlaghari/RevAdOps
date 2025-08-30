@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/Header';
@@ -25,6 +26,8 @@ interface Article {
   publishedAt: string;
   tags: string[];
   viewCount: number;
+  advertisement1?: string;
+  advertisement2?: string;
   category: {
     name: string;
     slug: string;
@@ -138,11 +141,9 @@ export default function ArticlePage() {
   ];
 
   return (
-    <div className="min-h-screen">
-      <Header />
-      
+    <>
       {/* SEO Meta Tags */}
-      <head>
+      <Head>
         <title>{article.title} | RevAdOps Blog</title>
         <meta name="description" content={article.metaDescription || article.excerpt} />
         <meta property="og:title" content={article.title} />
@@ -153,16 +154,12 @@ export default function ArticlePage() {
         <meta name="twitter:title" content={article.title} />
         <meta name="twitter:description" content={article.metaDescription || article.excerpt} />
         <meta name="twitter:image" content={article.featuredImage} />
-      </head>
+      </Head>
+
+      <div className="min-h-screen">
+        <Header />
 
       <main>
-        {/* Breadcrumbs */}
-        <div className="bg-gray-50 py-4">
-          <div className="container-custom">
-            <Breadcrumbs items={breadcrumbItems} />
-          </div>
-        </div>
-
         {/* Article Hero */}
         <ArticleHero article={article} />
 
@@ -233,14 +230,15 @@ export default function ArticlePage() {
 
               {/* Sidebar - 30% */}
               <div className="lg:w-[30%]">
-                <ArticleSidebar widgets={widgets} />
+                <ArticleSidebar widgets={widgets} article={article} />
               </div>
             </div>
           </div>
         </section>
       </main>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   );
 }

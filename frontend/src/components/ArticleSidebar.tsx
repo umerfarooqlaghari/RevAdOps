@@ -16,8 +16,29 @@ interface ArticleWidget {
   isActive?: boolean;
 }
 
+interface Article {
+  id: string;
+  title: string;
+  content: string;
+  excerpt: string;
+  slug: string;
+  featuredImage: string;
+  author: string;
+  metaDescription: string;
+  publishedAt: string;
+  tags: string[];
+  viewCount: number;
+  advertisement1?: string;
+  advertisement2?: string;
+  category: {
+    name: string;
+    slug: string;
+  } | null;
+}
+
 interface ArticleSidebarProps {
   widgets: ArticleWidget[];
+  article?: Article;
 }
 
 interface RecentArticle {
@@ -29,7 +50,7 @@ interface RecentArticle {
   featuredImage: string;
 }
 
-export default function ArticleSidebar({ widgets }: ArticleSidebarProps) {
+export default function ArticleSidebar({ widgets, article }: ArticleSidebarProps) {
   const [recentArticles, setRecentArticles] = useState<RecentArticle[]>([]);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -219,29 +240,69 @@ export default function ArticleSidebar({ widgets }: ArticleSidebarProps) {
           </div>
         );
 
+      case 'article_ad':
+        return (
+          <div key={widget.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+            {widget.title && (
+              <h3 className="text-sm font-medium text-gray-500 mb-3 text-center">
+                {widget.title}
+              </h3>
+            )}
+            <div className="flex items-center justify-center rounded-lg mx-auto overflow-hidden">
+              {widget.content ? (
+                <Image
+                  src={widget.content}
+                  alt="Advertisement"
+                  width={300}
+                  height={250}
+                  className="object-cover w-full h-auto max-w-[300px]"
+                  sizes="300px"
+                />
+              ) : (
+                <div className="text-center text-gray-400 bg-gray-100 rounded-lg flex items-center justify-center" style={{ width: '300px', height: '250px' }}>
+                  <div>
+                    <div className="text-sm font-medium">Advertisement</div>
+                    <div className="text-xs mt-1">300 x 250</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
   };
 
-  // Default widgets if none are configured
-  const defaultWidgets: ArticleWidget[] = [
-    {
-      id: 'default-ad-1',
-      type: 'ad_slot',
+  // Create article-specific advertisement widgets
+  const articleAdWidgets: ArticleWidget[] = [];
+
+  if (article?.advertisement1) {
+    articleAdWidgets.push({
+      id: 'article-ad-1',
+      type: 'article_ad',
       title: 'Advertisement',
-      content: '',
+      content: article.advertisement1,
       position: 1,
       settings: { width: 300, height: 250 }
-    },
-    {
-      id: 'default-ad-2',
-      type: 'ad_slot',
+    });
+  }
+
+  if (article?.advertisement2) {
+    articleAdWidgets.push({
+      id: 'article-ad-2',
+      type: 'article_ad',
       title: 'Advertisement',
-      content: '',
+      content: article.advertisement2,
       position: 2,
       settings: { width: 300, height: 250 }
-    },
+    });
+  }
+
+  // Default widgets if none are configured
+  const defaultWidgets: ArticleWidget[] = [
+    ...articleAdWidgets,
     {
       id: 'default-newsletter',
       type: 'newsletter',
@@ -259,6 +320,28 @@ export default function ArticleSidebar({ widgets }: ArticleSidebarProps) {
       settings: { limit: 5, showDate: true, showExcerpt: false }
     }
   ];
+
+  // If no article ads, add default ad slots
+  if (articleAdWidgets.length === 0) {
+    defaultWidgets.unshift(
+      {
+        id: 'default-ad-1',
+        type: 'ad_slot',
+        title: 'Advertisement',
+        content: '',
+        position: 1,
+        settings: { width: 300, height: 250 }
+      },
+      {
+        id: 'default-ad-2',
+        type: 'ad_slot',
+        title: 'Advertisement',
+        content: '',
+        position: 2,
+        settings: { width: 300, height: 250 }
+      }
+    );
+  }
 
   // Use configured widgets or default widgets
   const widgetsToRender = widgets.length > 0 ? widgets : defaultWidgets;

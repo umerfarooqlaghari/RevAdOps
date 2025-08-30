@@ -18,6 +18,7 @@ interface BlogPost {
     name: string;
     slug: string;
   };
+  customUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -174,7 +175,9 @@ export default function BlogSearch({
               {results.map((article) => (
                 <a
                   key={article.id}
-                  href={`/blog/${article.slug}`}
+                  href={article.customUrl || `/blog/${article.slug}`}
+                  target={article.customUrl ? "_blank" : "_self"}
+                  rel={article.customUrl ? "noopener noreferrer" : undefined}
                   className="block px-4 py-3 hover:bg-gray-50 transition-colors duration-150"
                   onClick={() => setShowResults(false)}
                 >
