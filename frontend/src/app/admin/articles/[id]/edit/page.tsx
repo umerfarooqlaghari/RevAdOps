@@ -15,6 +15,15 @@ interface Category {
   slug: string;
 }
 
+interface HtmlWidget {
+  id: string;
+  name: string;
+  title?: string;
+  htmlContent: string;
+  description?: string;
+  isActive: boolean;
+}
+
 interface ArticleForm {
   title: string;
   slug: string;
@@ -23,12 +32,16 @@ interface ArticleForm {
   featuredImage: string;
   author: string;
   metaDescription: string;
+  metaTitle: string;
+  metaKeywords: string;
+  metaCategory: string;
   status: string;
   categoryId: string;
   tags: string[];
   customUrl: string;
   advertisement1: string;
   advertisement2: string;
+  htmlWidgetIds: string[];
 }
 
 export default function EditArticle() {
@@ -37,11 +50,10 @@ export default function EditArticle() {
   const articleId = params.id as string;
   
   const [categories, setCategories] = useState<Category[]>([]);
+  const [htmlWidgets, setHtmlWidgets] = useState<HtmlWidget[]>([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [uploadingAd1, setUploadingAd1] = useState(false);
-  const [uploadingAd2, setUploadingAd2] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [originalForm, setOriginalForm] = useState<ArticleForm | null>(null);
   
@@ -53,16 +65,21 @@ export default function EditArticle() {
     featuredImage: '',
     author: 'RevAdOps Team',
     metaDescription: '',
+    metaTitle: '',
+    metaKeywords: '',
+    metaCategory: '',
     status: 'draft',
     categoryId: '',
     tags: [],
     customUrl: '',
     advertisement1: '',
-    advertisement2: ''
+    advertisement2: '',
+    htmlWidgetIds: []
   });
 
   useEffect(() => {
     fetchCategories();
+    fetchHtmlWidgets();
     fetchArticle();
   }, [articleId]);
 
@@ -72,13 +89,28 @@ export default function EditArticle() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs/categories/all`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setCategories(data || []);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
+    }
+  };
+
+  const fetchHtmlWidgets = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/html-widgets`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setHtmlWidgets(data.widgets?.filter((w: HtmlWidget) => w.isActive) || []);
+      }
+    } catch (error) {
+      console.error('Error fetching HTML widgets:', error);
     }
   };
 
@@ -99,12 +131,16 @@ export default function EditArticle() {
           featuredImage: article.featuredImage || '',
           author: article.author || 'RevAdOps Team',
           metaDescription: article.metaDescription || '',
+          metaTitle: article.metaTitle || '',
+          metaKeywords: article.metaKeywords || '',
+          metaCategory: article.metaCategory || '',
           status: article.status || 'draft',
           categoryId: article.categoryId || '',
           tags: article.tags || [],
           customUrl: article.customUrl || '',
           advertisement1: article.advertisement1 || '',
-          advertisement2: article.advertisement2 || ''
+          advertisement2: article.advertisement2 || '',
+          htmlWidgetIds: article.htmlWidgetIds || []
         };
         setForm(formData);
         setOriginalForm(formData);
@@ -151,65 +187,7 @@ export default function EditArticle() {
     }
   };
 
-  const handleAdvertisement1Upload = async (file: File) => {
-    setUploadingAd1(true);
-    try {
-      const token = localStorage.getItem('adminToken');
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('section', 'articles');
-      formData.append('key', 'advertisement1');
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/admin/image`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setForm(prev => ({ ...prev, advertisement1: data.url }));
-        alert('Advertisement 1 uploaded successfully!');
-      } else {
-        alert('Failed to upload advertisement 1');
-      }
-    } catch (error) {
-      console.error('Error uploading advertisement 1:', error);
-      alert('Error uploading advertisement 1');
-    } finally {
-      setUploadingAd1(false);
-    }
-  };
-
-  const handleAdvertisement2Upload = async (file: File) => {
-    setUploadingAd2(true);
-    try {
-      const token = localStorage.getItem('adminToken');
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('section', 'articles');
-      formData.append('key', 'advertisement2');
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/admin/image`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setForm(prev => ({ ...prev, advertisement2: data.url }));
-        alert('Advertisement 2 uploaded successfully!');
-      } else {
-        alert('Failed to upload advertisement 2');
-      }
-    } catch (error) {
-      console.error('Error uploading advertisement 2:', error);
-      alert('Error uploading advertisement 2');
-    } finally {
-      setUploadingAd2(false);
-    }
-  };
 
   const addTag = () => {
     if (tagInput.trim() && !form.tags.includes(tagInput.trim())) {
@@ -352,23 +330,7 @@ export default function EditArticle() {
               />
             </div>
 
-            {/* Slug */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                URL Slug *
-              </label>
-              <input
-                type="text"
-                value={form.slug}
-                onChange={(e) => setForm(prev => ({ ...prev, slug: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
-                placeholder="article-url-slug"
-                required
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                URL: /blog/{form.slug}
-              </p>
-            </div>
+
 
             {/* Excerpt */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -539,89 +501,57 @@ export default function EditArticle() {
               </div>
             </div>
 
-            {/* Advertisement 1 */}
+            {/* HTML Widgets */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Advertisement 1</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Advertisement Widgets</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Select HTML widgets to display with this article. You can select multiple widgets.
+              </p>
 
               <div className="space-y-4">
-                <div>
-                  <input
-                    type="text"
-                    value={form.advertisement1}
-                    onChange={(e) => setForm(prev => ({ ...prev, advertisement1: e.target.value }))}
-                    placeholder="Advertisement 1 Image URL"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
-                  />
-                </div>
-
-                <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-blue-300 rounded-md shadow-sm text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 w-full justify-center">
-                  <Upload className="h-4 w-4 mr-2" />
-                  {uploadingAd1 ? 'Uploading...' : 'Upload Advertisement 1'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleAdvertisement1Upload(file);
-                    }}
-                    className="hidden"
-                    disabled={uploadingAd1}
-                  />
-                </label>
-
-                {form.advertisement1 && (
-                  <div className="relative w-full h-32 border border-gray-300 rounded-md overflow-hidden">
-                    <Image
-                      src={form.advertisement1}
-                      alt="Advertisement 1 preview"
-                      fill
-                      className="object-cover"
-                      sizes="300px"
-                    />
+                {htmlWidgets.length === 0 ? (
+                  <div className="text-center py-4">
+                    <p className="text-gray-500">No active HTML widgets available.</p>
+                    <Link
+                      href="/admin/html-widgets/new"
+                      className="text-blue-600 hover:text-blue-800 text-sm"
+                    >
+                      Create a new widget
+                    </Link>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* Advertisement 2 */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Advertisement 2</h3>
-
-              <div className="space-y-4">
-                <div>
-                  <input
-                    type="text"
-                    value={form.advertisement2}
-                    onChange={(e) => setForm(prev => ({ ...prev, advertisement2: e.target.value }))}
-                    placeholder="Advertisement 2 Image URL"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
-                  />
-                </div>
-
-                <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-blue-300 rounded-md shadow-sm text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 w-full justify-center">
-                  <Upload className="h-4 w-4 mr-2" />
-                  {uploadingAd2 ? 'Uploading...' : 'Upload Advertisement 2'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleAdvertisement2Upload(file);
-                    }}
-                    className="hidden"
-                    disabled={uploadingAd2}
-                  />
-                </label>
-
-                {form.advertisement2 && (
-                  <div className="relative w-full h-32 border border-gray-300 rounded-md overflow-hidden">
-                    <Image
-                      src={form.advertisement2}
-                      alt="Advertisement 2 preview"
-                      fill
-                      className="object-cover"
-                      sizes="300px"
-                    />
+                ) : (
+                  <div className="space-y-2">
+                    {htmlWidgets.map((widget) => (
+                      <label key={widget.id} className="flex items-start space-x-3 p-3 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={form.htmlWidgetIds.includes(widget.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setForm(prev => ({
+                                ...prev,
+                                htmlWidgetIds: [...prev.htmlWidgetIds, widget.id]
+                              }));
+                            } else {
+                              setForm(prev => ({
+                                ...prev,
+                                htmlWidgetIds: prev.htmlWidgetIds.filter(id => id !== widget.id)
+                              }));
+                            }
+                          }}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{widget.name}</div>
+                          {widget.title && (
+                            <div className="text-sm text-gray-600">Title: {widget.title}</div>
+                          )}
+                          {widget.description && (
+                            <div className="text-sm text-gray-500">{widget.description}</div>
+                          )}
+                        </div>
+                      </label>
+                    ))}
                   </div>
                 )}
               </div>
@@ -630,7 +560,7 @@ export default function EditArticle() {
             {/* SEO */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">SEO</h3>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   Meta Description
@@ -646,6 +576,79 @@ export default function EditArticle() {
                 <p className="text-sm text-gray-500 mt-1">
                   {form.metaDescription.length}/160 characters
                 </p>
+              </div>
+            </div>
+
+            {/* Meta Information */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Meta Information</h3>
+
+              <div className="space-y-4">
+                {/* Meta Title */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Meta Title
+                  </label>
+                  <input
+                    type="text"
+                    value={form.metaTitle}
+                    onChange={(e) => setForm(prev => ({ ...prev, metaTitle: e.target.value }))}
+                    maxLength={60}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    placeholder="SEO title for search engines..."
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    {form.metaTitle.length}/60 characters
+                  </p>
+                </div>
+
+                {/* Meta Keywords */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Meta Keywords
+                  </label>
+                  <input
+                    type="text"
+                    value={form.metaKeywords}
+                    onChange={(e) => setForm(prev => ({ ...prev, metaKeywords: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    placeholder="Comma-separated keywords..."
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Separate keywords with commas
+                  </p>
+                </div>
+
+                {/* Meta Category */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Meta Category
+                  </label>
+                  <input
+                    type="text"
+                    value={form.metaCategory}
+                    onChange={(e) => setForm(prev => ({ ...prev, metaCategory: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    placeholder="Article category for organization..."
+                  />
+                </div>
+
+                {/* Article Slug (Auto-generated but editable) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Article Slug / Post ID
+                  </label>
+                  <input
+                    type="text"
+                    value={form.slug}
+                    onChange={(e) => setForm(prev => ({ ...prev, slug: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    placeholder="URL-friendly identifier..."
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    This will be used in the article URL. Auto-generated from title but can be customized.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

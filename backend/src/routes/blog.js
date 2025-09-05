@@ -338,6 +338,9 @@ router.post('/', authenticateToken, [
   body('tags').optional().isArray(),
   body('author').optional().trim(),
   body('metaDescription').optional().trim(),
+  body('metaTitle').optional().trim(),
+  body('metaKeywords').optional().trim(),
+  body('metaCategory').optional().trim(),
   body('status').optional().isIn(['draft', 'published', 'archived']),
   body('featuredImage').optional().custom((value) => {
     if (!value || value === '' || value === null) return true; // Allow empty strings and null
@@ -354,7 +357,8 @@ router.post('/', authenticateToken, [
   body('advertisement2').optional().custom((value) => {
     if (!value || value === '' || value === null) return true; // Allow empty strings and null
     return /^https?:\/\/.+/.test(value); // Validate URL format if not empty
-  })
+  }),
+  body('htmlWidgetIds').optional().isArray().withMessage('HTML widget IDs must be an array')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -372,12 +376,16 @@ router.post('/', authenticateToken, [
       featuredImage,
       author,
       metaDescription,
+      metaTitle,
+      metaKeywords,
+      metaCategory,
       status,
       isPublished,
       publishedAt,
       customUrl,
       advertisement1,
-      advertisement2
+      advertisement2,
+      htmlWidgetIds
     } = req.body;
 
     // Check if slug already exists
@@ -400,13 +408,17 @@ router.post('/', authenticateToken, [
         featuredImage,
         author: author || 'RevAdOps Team',
         metaDescription: metaDescription || excerpt || title,
+        metaTitle: metaTitle || title,
+        metaKeywords: metaKeywords || null,
+        metaCategory: metaCategory || null,
         status: status || 'draft',
         isPublished: isPublished || false,
         publishedAt: (isPublished && publishedAt) ? new Date(publishedAt) : (isPublished ? new Date() : null),
         viewCount: 0,
         customUrl: customUrl || null,
         advertisement1: advertisement1 || null,
-        advertisement2: advertisement2 || null
+        advertisement2: advertisement2 || null,
+        htmlWidgetIds: htmlWidgetIds || []
       },
       include: {
         category: true
@@ -437,12 +449,16 @@ router.put('/:id', authenticateToken, async (req, res) => {
       featuredImage,
       author,
       metaDescription,
+      metaTitle,
+      metaKeywords,
+      metaCategory,
       status,
       isPublished,
       publishedAt,
       customUrl,
       advertisement1,
-      advertisement2
+      advertisement2,
+      htmlWidgetIds
     } = req.body;
 
     // Check if blog exists
@@ -475,10 +491,14 @@ router.put('/:id', authenticateToken, async (req, res) => {
       ...(featuredImage !== undefined && { featuredImage }),
       ...(author !== undefined && { author }),
       ...(metaDescription !== undefined && { metaDescription }),
+      ...(metaTitle !== undefined && { metaTitle }),
+      ...(metaKeywords !== undefined && { metaKeywords }),
+      ...(metaCategory !== undefined && { metaCategory }),
       ...(status !== undefined && { status }),
       ...(customUrl !== undefined && { customUrl: customUrl || null }),
       ...(advertisement1 !== undefined && { advertisement1: advertisement1 || null }),
       ...(advertisement2 !== undefined && { advertisement2: advertisement2 || null }),
+      ...(htmlWidgetIds !== undefined && { htmlWidgetIds: htmlWidgetIds || [] }),
       ...(isPublished !== undefined && {
         isPublished,
         publishedAt: isPublished && !existingBlog.publishedAt ? new Date() : existingBlog.publishedAt

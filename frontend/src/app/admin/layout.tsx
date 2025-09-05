@@ -91,6 +91,7 @@ export default function AdminLayout({
     { name: 'About Us Content', href: '/admin/about', icon: FileText },
     { name: 'Articles', href: '/admin/articles', icon: FileText },
     { name: 'Categories', href: '/admin/categories', icon: Tag },
+    { name: 'HTML Widgets', href: '/admin/html-widgets', icon: FileText },
     { name: 'Media Library', href: '/admin/media', icon: Image },
     { name: 'Leads', href: '/admin/leads', icon: Users },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
