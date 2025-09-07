@@ -8,6 +8,7 @@ import { Save, Eye, Upload, X, ArrowLeft } from 'lucide-react';
 import RichTextEditor from '@/components/RichTextEditor';
 import Image from 'next/image';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 interface Category {
   id: string;
@@ -175,13 +176,29 @@ export default function EditArticle() {
       if (response.ok) {
         const data = await response.json();
         setForm(prev => ({ ...prev, featuredImage: data.url }));
-        alert('Image uploaded successfully!');
+        toast.success('Image uploaded successfully!', {
+          duration: 3000,
+        });
       } else {
-        alert('Failed to upload image');
+        const errorData = await response.json();
+        const errorMessage = errorData.error || errorData.message || 'Unknown error occurred';
+
+        toast.error(errorMessage, {
+          duration: 6000,
+          style: {
+            maxWidth: '500px',
+            fontSize: '14px',
+            lineHeight: '1.4',
+          },
+        });
+
+        console.error('Upload error response:', errorData);
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Error uploading image');
+      toast.error('Network error during image upload', {
+        duration: 5000,
+      });
     } finally {
       setUploadingImage(false);
     }
@@ -234,14 +251,21 @@ export default function EditArticle() {
       if (response.ok) {
         const updatedArticle = await response.json();
         setOriginalForm(form); // Update original form to reflect saved state
-        alert('Article updated successfully!');
+        toast.success('Article updated successfully!', {
+          duration: 3000,
+        });
       } else {
         const errorData = await response.json();
-        alert(`Failed to update article: ${errorData.message || 'Unknown error'}`);
+        toast.error('Failed to update article', {
+          duration: 5000,
+        });
+        console.error('Update article error:', errorData);
       }
     } catch (error) {
       console.error('Error updating article:', error);
-      alert('Error updating article');
+      toast.error('Network error while updating article', {
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }

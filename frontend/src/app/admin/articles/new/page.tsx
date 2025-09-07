@@ -8,6 +8,7 @@ import { Save, Eye, Upload, X } from 'lucide-react';
 import RichTextEditor from '@/components/RichTextEditor';
 import Image from 'next/image';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 interface Category {
   id: string;
@@ -139,13 +140,30 @@ export default function NewArticle() {
       if (response.ok) {
         const data = await response.json();
         setForm(prev => ({ ...prev, featuredImage: data.url }));
-        alert('Image uploaded successfully!');
+        toast.success('Image uploaded successfully!', {
+          duration: 3000,
+        });
       } else {
-        alert('Failed to upload image');
+        const errorData = await response.json();
+        const errorMessage = errorData.error || errorData.message || 'Unknown error occurred';
+
+        toast.error(errorMessage, {
+          duration: 6000,
+          style: {
+            maxWidth: '500px',
+            fontSize: '14px',
+            lineHeight: '1.4',
+          },
+        });
+
+        // Show detailed error in console for debugging
+        console.error('Upload error response:', errorData);
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Error uploading image');
+      toast.error('Network error during image upload', {
+        duration: 5000,
+      });
     } finally {
       setUploadingImage(false);
     }
@@ -191,15 +209,22 @@ export default function NewArticle() {
 
       if (response.ok) {
         const data = await response.json();
-        alert('Article created successfully!');
+        toast.success('Article created successfully!', {
+          duration: 3000,
+        });
         router.push('/admin/articles');
       } else {
         const errorData = await response.json();
-        alert(`Failed to create article: ${errorData.message || 'Unknown error'}`);
+        toast.error('Failed to create article', {
+          duration: 5000,
+        });
+        console.error('Create article error:', errorData);
       }
     } catch (error) {
       console.error('Error creating article:', error);
-      alert('Error creating article');
+      toast.error('Network error while creating article', {
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }

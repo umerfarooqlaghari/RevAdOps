@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Eye, Code } from 'lucide-react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 interface HtmlWidget {
   id: string;
@@ -55,13 +56,21 @@ export default function HtmlWidgets() {
 
       if (response.ok) {
         setWidgets(widgets.filter(w => w.id !== id));
-        alert('Widget deleted successfully!');
+        toast.success('Widget deleted successfully!', {
+          duration: 3000,
+        });
       } else {
-        alert('Failed to delete widget');
+        const errorData = await response.json();
+        const errorMessage = errorData.message || errorData.error || 'Failed to delete widget';
+        toast.error(errorMessage, {
+          duration: 4000,
+        });
       }
     } catch (error) {
       console.error('Error deleting widget:', error);
-      alert('Error deleting widget');
+      toast.error('Network error while deleting widget', {
+        duration: 4000,
+      });
     }
   };
 
@@ -78,15 +87,24 @@ export default function HtmlWidgets() {
       });
 
       if (response.ok) {
-        setWidgets(widgets.map(w => 
+        setWidgets(widgets.map(w =>
           w.id === id ? { ...w, isActive: !isActive } : w
         ));
+        toast.success(`Widget ${!isActive ? 'activated' : 'deactivated'} successfully!`, {
+          duration: 3000,
+        });
       } else {
-        alert('Failed to update widget status');
+        const errorData = await response.json();
+        const errorMessage = errorData.message || errorData.error || 'Failed to update widget status';
+        toast.error(errorMessage, {
+          duration: 4000,
+        });
       }
     } catch (error) {
       console.error('Error updating widget:', error);
-      alert('Error updating widget');
+      toast.error('Network error while updating widget', {
+        duration: 4000,
+      });
     }
   };
 

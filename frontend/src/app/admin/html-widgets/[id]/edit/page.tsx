@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Save, ArrowLeft, Eye } from 'lucide-react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 interface WidgetForm {
   name: string;
@@ -53,12 +54,16 @@ export default function EditHtmlWidget() {
           isActive: widget.isActive
         });
       } else {
-        alert('Widget not found');
+        toast.error('Widget not found', {
+          duration: 3000,
+        });
         router.push('/admin/html-widgets');
       }
     } catch (error) {
       console.error('Error fetching widget:', error);
-      alert('Error loading widget');
+      toast.error('Error loading widget', {
+        duration: 3000,
+      });
       router.push('/admin/html-widgets');
     } finally {
       setFetching(false);
@@ -93,15 +98,25 @@ export default function EditHtmlWidget() {
       });
 
       if (response.ok) {
-        alert('Widget updated successfully!');
+        toast.success('Widget updated successfully!', {
+          duration: 3000,
+        });
         router.push('/admin/html-widgets');
       } else {
-        const error = await response.json();
-        alert(`Failed to update widget: ${error.message || 'Unknown error'}`);
+        const errorData = await response.json();
+        const errorMessage = errorData.message || errorData.error || 'Unknown error occurred';
+        toast.error(`Failed to update widget: ${errorMessage}`, {
+          duration: 5000,
+          style: {
+            maxWidth: '500px',
+          },
+        });
       }
     } catch (error) {
       console.error('Error updating widget:', error);
-      alert('Error updating widget');
+      toast.error('Network error while updating widget', {
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }

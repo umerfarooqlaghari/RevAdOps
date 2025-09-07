@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Save, ArrowLeft, Eye } from 'lucide-react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 interface WidgetForm {
   name: string;
@@ -54,15 +55,25 @@ export default function NewHtmlWidget() {
       });
 
       if (response.ok) {
-        alert('Widget created successfully!');
+        toast.success('Widget created successfully!', {
+          duration: 3000,
+        });
         router.push('/admin/html-widgets');
       } else {
-        const error = await response.json();
-        alert(`Failed to create widget: ${error.message || 'Unknown error'}`);
+        const errorData = await response.json();
+        const errorMessage = errorData.message || errorData.error || 'Unknown error occurred';
+        toast.error(`Failed to create widget: ${errorMessage}`, {
+          duration: 5000,
+          style: {
+            maxWidth: '500px',
+          },
+        });
       }
     } catch (error) {
       console.error('Error creating widget:', error);
-      alert('Error creating widget');
+      toast.error('Network error while creating widget', {
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
