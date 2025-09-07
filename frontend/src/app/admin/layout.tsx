@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { Toaster } from 'react-hot-toast';
 import {
   Home,
   Settings,
@@ -91,6 +92,7 @@ export default function AdminLayout({
     { name: 'About Us Content', href: '/admin/about', icon: FileText },
     { name: 'Articles', href: '/admin/articles', icon: FileText },
     { name: 'Categories', href: '/admin/categories', icon: Tag },
+    { name: 'HTML Widgets', href: '/admin/html-widgets', icon: FileText },
     { name: 'Media Library', href: '/admin/media', icon: Image },
     { name: 'Leads', href: '/admin/leads', icon: Users },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
@@ -200,6 +202,30 @@ export default function AdminLayout({
           {children}
         </main>
       </div>
+
+      {/* Toast notifications */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          success: {
+            duration: 3000,
+            style: {
+              background: '#10B981',
+            },
+          },
+          error: {
+            duration: 5000,
+            style: {
+              background: '#EF4444',
+            },
+          },
+        }}
+      />
     </div>
   );
 }

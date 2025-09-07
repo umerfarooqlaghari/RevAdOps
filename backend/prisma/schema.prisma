@@ -94,6 +94,9 @@ model Blog {
   featuredImage String?
   author        String?
   metaDescription String?
+  metaTitle     String?       // SEO meta title
+  metaKeywords  String?       // SEO meta keywords
+  metaCategory  String?       // Meta category for organization
   status        String        @default("draft") // draft, published, archived
   isPublished   Boolean       @default(false)
   publishedAt   DateTime?
@@ -102,8 +105,9 @@ model Blog {
   category      BlogCategory? @relation(fields: [categoryId], references: [id])
   viewCount     Int           @default(0)
   customUrl     String?       // Optional custom URL for external redirects
-  advertisement1 String?      // First advertisement image URL
-  advertisement2 String?      // Second advertisement image URL
+  advertisement1 String?      // First advertisement image URL (deprecated, use htmlWidgets)
+  advertisement2 String?      // Second advertisement image URL (deprecated, use htmlWidgets)
+  htmlWidgetIds String[]      // Array of HTML widget IDs to display with this article
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -171,6 +175,19 @@ model ArticleWidget {
   updatedAt   DateTime @updatedAt
 
   @@map("article_widgets")
+}
+
+model HtmlWidget {
+  id          String   @id @default(cuid())
+  name        String   // Display name for admin interface
+  title       String?  // Optional title to display with the widget
+  htmlContent String   @db.Text // HTML/CSS/JS content
+  description String?  // Optional description for admin reference
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("html_widgets")
 }
 
 model Advertisement {

@@ -30,10 +30,20 @@ interface Article {
   viewCount: number;
   advertisement1?: string;
   advertisement2?: string;
+  htmlWidgetIds?: string[];
   category: {
     name: string;
     slug: string;
   } | null;
+}
+
+interface HtmlWidget {
+  id: string;
+  name: string;
+  title?: string;
+  htmlContent: string;
+  description?: string;
+  isActive: boolean;
 }
 
 interface ArticleSidebarProps {
@@ -54,6 +64,7 @@ export default function ArticleSidebar({ widgets, article }: ArticleSidebarProps
   const [recentArticles, setRecentArticles] = useState<RecentArticle[]>([]);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [htmlWidgets, setHtmlWidgets] = useState<HtmlWidget[]>([]);
 
   useEffect(() => {
     // Fetch recent articles for the recent articles widget
@@ -69,8 +80,28 @@ export default function ArticleSidebar({ widgets, article }: ArticleSidebarProps
       }
     };
 
+    // Fetch HTML widgets if article has htmlWidgetIds
+    const fetchHtmlWidgets = async () => {
+      if (article?.htmlWidgetIds && article.htmlWidgetIds.length > 0) {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/html-widgets/by-ids`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ widgetIds: article.htmlWidgetIds })
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setHtmlWidgets(data.widgets || []);
+          }
+        } catch (error) {
+          console.error('Error fetching HTML widgets:', error);
+        }
+      }
+    };
+
     fetchRecentArticles();
-  }, []);
+    fetchHtmlWidgets();
+  }, [article?.htmlWidgetIds]);
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -270,6 +301,21 @@ export default function ArticleSidebar({ widgets, article }: ArticleSidebarProps
           </div>
         );
 
+      case 'html_widget':
+        return (
+          <div key={widget.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+            {widget.title && (
+              <h3 className="text-sm font-medium text-gray-500 mb-3 text-center">
+                {widget.title}
+              </h3>
+            )}
+            <div
+              className="html-widget-content"
+              dangerouslySetInnerHTML={{ __html: widget.content }}
+            />
+          </div>
+        );
+
       default:
         return null;
     }
@@ -278,26 +324,43 @@ export default function ArticleSidebar({ widgets, article }: ArticleSidebarProps
   // Create article-specific advertisement widgets
   const articleAdWidgets: ArticleWidget[] = [];
 
-  if (article?.advertisement1) {
-    articleAdWidgets.push({
-      id: 'article-ad-1',
-      type: 'article_ad',
-      title: 'Advertisement',
-      content: article.advertisement1,
-      position: 1,
-      settings: { width: 300, height: 250 }
+  // Add HTML widgets if available
+  if (htmlWidgets.length > 0) {
+    htmlWidgets.forEach((htmlWidget, index) => {
+      articleAdWidgets.push({
+        id: `html-widget-${htmlWidget.id}`,
+        type: 'html_widget',
+        title: htmlWidget.title || htmlWidget.name,
+        content: htmlWidget.htmlContent,
+        position: index + 1,
+        settings: {}
+      });
     });
   }
 
-  if (article?.advertisement2) {
-    articleAdWidgets.push({
-      id: 'article-ad-2',
-      type: 'article_ad',
-      title: 'Advertisement',
-      content: article.advertisement2,
-      position: 2,
-      settings: { width: 300, height: 250 }
-    });
+  // Fallback to legacy advertisement fields if no HTML widgets
+  if (htmlWidgets.length === 0) {
+    if (article?.advertisement1) {
+      articleAdWidgets.push({
+        id: 'article-ad-1',
+        type: 'article_ad',
+        title: 'Advertisement',
+        content: article.advertisement1,
+        position: 1,
+        settings: { width: 300, height: 250 }
+      });
+    }
+
+    if (article?.advertisement2) {
+      articleAdWidgets.push({
+        id: 'article-ad-2',
+        type: 'article_ad',
+        title: 'Advertisement',
+        content: article.advertisement2,
+        position: 2,
+        settings: { width: 300, height: 250 }
+      });
+    }
   }
 
   // Default widgets if none are configured
