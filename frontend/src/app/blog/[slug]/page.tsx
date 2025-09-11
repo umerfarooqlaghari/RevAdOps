@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/Header';
@@ -14,6 +13,148 @@ import ArticleSidebar from '@/components/ArticleSidebar';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import { Calendar, User, Eye, Tag } from 'lucide-react';
 
+// Custom hook to update document head for SEO
+const useDocumentHead = (article: Article | null) => {
+  useEffect(() => {
+    if (!article) return;
+
+    // Update document title
+    const originalTitle = document.title;
+    const metaTitle = article.metaTitle || article.title;
+    document.title = `${metaTitle} | RevAdOps Blog`;
+
+    // Update or create meta description
+    const updateOrCreateMeta = (name: string, content: string, property?: string) => {
+      const selector = property ? `meta[property="${property}"]` : `meta[name="${name}"]`;
+      let meta = document.querySelector(selector) as HTMLMetaElement;
+
+      if (!meta) {
+        meta = document.createElement('meta');
+        if (property) {
+          meta.setAttribute('property', property);
+        } else {
+          meta.setAttribute('name', name);
+        }
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', content);
+    };
+
+    // Basic SEO meta tags
+    updateOrCreateMeta('description', article.metaDescription || article.excerpt || '');
+
+    // Keywords meta tag
+    if (article.metaKeywords) {
+      updateOrCreateMeta('keywords', article.metaKeywords);
+    }
+
+    // Author meta tag
+    updateOrCreateMeta('author', article.author || 'RevAdOps Team');
+
+    // Article meta tags
+    updateOrCreateMeta('article:author', article.author || 'RevAdOps Team');
+    updateOrCreateMeta('article:published_time', article.publishedAt);
+
+    if (article.metaCategory || article.category?.name) {
+      updateOrCreateMeta('article:section', article.metaCategory || article.category?.name || '');
+    }
+
+    if (article.tags && article.tags.length > 0) {
+      article.tags.forEach(tag => {
+        const tagMeta = document.createElement('meta');
+        tagMeta.setAttribute('property', 'article:tag');
+        tagMeta.setAttribute('content', tag);
+        document.head.appendChild(tagMeta);
+      });
+    }
+
+    // Open Graph meta tags
+    updateOrCreateMeta('', metaTitle, 'og:title');
+    updateOrCreateMeta('', article.metaDescription || article.excerpt || '', 'og:description');
+    updateOrCreateMeta('', 'article', 'og:type');
+    updateOrCreateMeta('', window.location.href, 'og:url');
+
+    if (article.featuredImage) {
+      updateOrCreateMeta('', article.featuredImage, 'og:image');
+      updateOrCreateMeta('', article.title, 'og:image:alt');
+    }
+
+    // Twitter Card meta tags
+    updateOrCreateMeta('twitter:card', 'summary_large_image');
+    updateOrCreateMeta('twitter:title', metaTitle);
+    updateOrCreateMeta('twitter:description', article.metaDescription || article.excerpt || '');
+
+    if (article.featuredImage) {
+      updateOrCreateMeta('twitter:image', article.featuredImage);
+    }
+
+    // Add structured data (JSON-LD) for better SEO
+    const addStructuredData = () => {
+      // Remove existing structured data
+      const existingScript = document.querySelector('script[type="application/ld+json"]');
+      if (existingScript) {
+        existingScript.remove();
+      }
+
+      const structuredData: any = {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": metaTitle,
+        "description": article.metaDescription || article.excerpt || '',
+        "image": article.featuredImage || '',
+        "author": {
+          "@type": "Person",
+          "name": article.author || 'RevAdOps Team'
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "RevAdOps",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://revadops.com/logo.png"
+          }
+        },
+        "datePublished": article.publishedAt,
+        "dateModified": article.publishedAt,
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": window.location.href
+        }
+      };
+
+      if (article.metaKeywords) {
+        structuredData.keywords = article.metaKeywords;
+      }
+
+      if (article.metaCategory || article.category?.name) {
+        structuredData.articleSection = article.metaCategory || article.category?.name;
+      }
+
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify(structuredData);
+      document.head.appendChild(script);
+    };
+
+    addStructuredData();
+
+    // Cleanup function to restore original title
+    return () => {
+      document.title = originalTitle;
+
+      // Remove article-specific meta tags on cleanup
+      const articleTags = document.querySelectorAll('meta[property="article:tag"]');
+      articleTags.forEach(tag => tag.remove());
+
+      // Remove structured data
+      const structuredDataScript = document.querySelector('script[type="application/ld+json"]');
+      if (structuredDataScript) {
+        structuredDataScript.remove();
+      }
+    };
+  }, [article]);
+};
+
 interface Article {
   id: string;
   title: string;
@@ -23,11 +164,15 @@ interface Article {
   featuredImage: string;
   author: string;
   metaDescription: string;
+  metaTitle?: string;
+  metaKeywords?: string;
+  metaCategory?: string;
   publishedAt: string;
   tags: string[];
   viewCount: number;
   advertisement1?: string;
   advertisement2?: string;
+  htmlWidgetIds?: string[];
   category: {
     name: string;
     slug: string;
@@ -51,6 +196,9 @@ export default function ArticlePage() {
   const [widgets, setWidgets] = useState<ArticleWidget[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Use custom hook to update document head for SEO
+  useDocumentHead(article);
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -141,22 +289,7 @@ export default function ArticlePage() {
   ];
 
   return (
-    <>
-      {/* SEO Meta Tags */}
-      <Head>
-        <title>{article.title} | RevAdOps Blog</title>
-        <meta name="description" content={article.metaDescription || article.excerpt} />
-        <meta property="og:title" content={article.title} />
-        <meta property="og:description" content={article.metaDescription || article.excerpt} />
-        <meta property="og:image" content={article.featuredImage} />
-        <meta property="og:type" content="article" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={article.title} />
-        <meta name="twitter:description" content={article.metaDescription || article.excerpt} />
-        <meta name="twitter:image" content={article.featuredImage} />
-      </Head>
-
-      <div className="min-h-screen">
+    <div className="min-h-screen">
         <Header />
 
       <main>
@@ -239,6 +372,5 @@ export default function ArticlePage() {
 
         <Footer />
       </div>
-    </>
   );
 }

@@ -13,6 +13,9 @@ interface Article {
   featuredImage: string;
   author: string;
   metaDescription: string;
+  metaTitle?: string;
+  metaKeywords?: string;
+  metaCategory?: string;
   publishedAt: string;
   tags: string[];
   viewCount: number;
