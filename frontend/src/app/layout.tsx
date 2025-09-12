@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 // import { Geist } from "next/font/google";
 
 import "./globals.css";
+import { ArticleCacheProvider } from "@/contexts/ArticleCacheContext";
 
 
 // const geistSans = Geist({
@@ -43,7 +44,9 @@ export default function RootLayout({
       <body
         // className={`${geistSans.variable} antialiased`}
       >
-        {children}
+        <ArticleCacheProvider>
+          {children}
+        </ArticleCacheProvider>
       </body>
     </html>
   );

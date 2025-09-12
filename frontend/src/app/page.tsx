@@ -9,8 +9,9 @@ import DynamicWhyChooseSection from '@/components/DynamicWhyChooseSection';
 import DynamicHowItWorksSection from '@/components/DynamicHowItWorksSection';
 import DynamicExpertiseSection from '@/components/DynamicExpertiseSection';
 import DynamicTestimonialsSection from '@/components/DynamicTestimonialsSection';
-
 import DynamicFinalCTASection from '@/components/DynamicFinalCTASection';
+import { useArticleCache } from '@/contexts/ArticleCacheContext';
+import ArticleCacheStatus from '@/components/ArticleCacheStatus';
 
 interface ContentSection {
   [key: string]: string;
@@ -50,9 +51,19 @@ export default function Home() {
   const [testimonialItems, setTestimonialItems] = useState<TestimonialItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Use article cache to pre-load all articles
+  const { isInitialized: articlesLoaded, isLoading: articlesLoading, cacheStats } = useArticleCache();
+
   useEffect(() => {
     fetchContent();
   }, []);
+
+  // Log cache status when articles are loaded
+  useEffect(() => {
+    if (articlesLoaded) {
+      console.log('🎉 Homepage: Articles cache loaded!', cacheStats);
+    }
+  }, [articlesLoaded, cacheStats]);
 
   const fetchContent = async () => {
     try {
@@ -83,10 +94,21 @@ export default function Home() {
     }
   };
 
-  if (isLoading) {
+  // Show loading while content or articles are loading
+  if (isLoading || articlesLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">
+            {isLoading ? 'Loading content...' : 'Pre-loading articles for optimal SEO...'}
+          </p>
+          {articlesLoading && (
+            <p className="text-gray-500 text-sm mt-2">
+              Caching {cacheStats.totalArticles} articles for instant access
+            </p>
+          )}
+        </div>
       </div>
     );
   }
@@ -107,6 +129,9 @@ export default function Home() {
         <DynamicFinalCTASection content={content.final_cta || {}} />
       </main>
       <Footer />
+
+      {/* Show cache status during development */}
+      {process.env.NODE_ENV === 'development' && <ArticleCacheStatus />}
     </div>
   );
 }

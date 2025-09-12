@@ -1,160 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-'use client';
+import { notFound } from 'next/navigation';
+import BlogArticleClient from './BlogArticleClient';
+import { Metadata } from 'next';
+import { articleCache } from '@/lib/articleCache';
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import ArticleHero from '@/components/ArticleHero';
-import ArticleContent from '@/components/ArticleContent';
-import ArticleSidebar from '@/components/ArticleSidebar';
-import Breadcrumbs from '@/components/Breadcrumbs';
-import { Calendar, User, Eye, Tag } from 'lucide-react';
-
-// Custom hook to update document head for SEO
-const useDocumentHead = (article: Article | null) => {
-  useEffect(() => {
-    if (!article) return;
-
-    // Update document title
-    const originalTitle = document.title;
-    const metaTitle = article.metaTitle || article.title;
-    document.title = `${metaTitle} | RevAdOps Blog`;
-
-    // Update or create meta description
-    const updateOrCreateMeta = (name: string, content: string, property?: string) => {
-      const selector = property ? `meta[property="${property}"]` : `meta[name="${name}"]`;
-      let meta = document.querySelector(selector) as HTMLMetaElement;
-
-      if (!meta) {
-        meta = document.createElement('meta');
-        if (property) {
-          meta.setAttribute('property', property);
-        } else {
-          meta.setAttribute('name', name);
-        }
-        document.head.appendChild(meta);
-      }
-      meta.setAttribute('content', content);
-    };
-
-    // Basic SEO meta tags
-    updateOrCreateMeta('description', article.metaDescription || article.excerpt || '');
-
-    // Keywords meta tag
-    if (article.metaKeywords) {
-      updateOrCreateMeta('keywords', article.metaKeywords);
-    }
-
-    // Author meta tag
-    updateOrCreateMeta('author', article.author || 'RevAdOps Team');
-
-    // Article meta tags
-    updateOrCreateMeta('article:author', article.author || 'RevAdOps Team');
-    updateOrCreateMeta('article:published_time', article.publishedAt);
-
-    if (article.metaCategory || article.category?.name) {
-      updateOrCreateMeta('article:section', article.metaCategory || article.category?.name || '');
-    }
-
-    if (article.tags && article.tags.length > 0) {
-      article.tags.forEach(tag => {
-        const tagMeta = document.createElement('meta');
-        tagMeta.setAttribute('property', 'article:tag');
-        tagMeta.setAttribute('content', tag);
-        document.head.appendChild(tagMeta);
-      });
-    }
-
-    // Open Graph meta tags
-    updateOrCreateMeta('', metaTitle, 'og:title');
-    updateOrCreateMeta('', article.metaDescription || article.excerpt || '', 'og:description');
-    updateOrCreateMeta('', 'article', 'og:type');
-    updateOrCreateMeta('', window.location.href, 'og:url');
-
-    if (article.featuredImage) {
-      updateOrCreateMeta('', article.featuredImage, 'og:image');
-      updateOrCreateMeta('', article.title, 'og:image:alt');
-    }
-
-    // Twitter Card meta tags
-    updateOrCreateMeta('twitter:card', 'summary_large_image');
-    updateOrCreateMeta('twitter:title', metaTitle);
-    updateOrCreateMeta('twitter:description', article.metaDescription || article.excerpt || '');
-
-    if (article.featuredImage) {
-      updateOrCreateMeta('twitter:image', article.featuredImage);
-    }
-
-    // Add structured data (JSON-LD) for better SEO
-    const addStructuredData = () => {
-      // Remove existing structured data
-      const existingScript = document.querySelector('script[type="application/ld+json"]');
-      if (existingScript) {
-        existingScript.remove();
-      }
-
-      const structuredData: any = {
-        "@context": "https://schema.org",
-        "@type": "Article",
-        "headline": metaTitle,
-        "description": article.metaDescription || article.excerpt || '',
-        "image": article.featuredImage || '',
-        "author": {
-          "@type": "Person",
-          "name": article.author || 'RevAdOps Team'
-        },
-        "publisher": {
-          "@type": "Organization",
-          "name": "RevAdOps",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "https://revadops.com/logo.png"
-          }
-        },
-        "datePublished": article.publishedAt,
-        "dateModified": article.publishedAt,
-        "mainEntityOfPage": {
-          "@type": "WebPage",
-          "@id": window.location.href
-        }
-      };
-
-      if (article.metaKeywords) {
-        structuredData.keywords = article.metaKeywords;
-      }
-
-      if (article.metaCategory || article.category?.name) {
-        structuredData.articleSection = article.metaCategory || article.category?.name;
-      }
-
-      const script = document.createElement('script');
-      script.type = 'application/ld+json';
-      script.textContent = JSON.stringify(structuredData);
-      document.head.appendChild(script);
-    };
-
-    addStructuredData();
-
-    // Cleanup function to restore original title
-    return () => {
-      document.title = originalTitle;
-
-      // Remove article-specific meta tags on cleanup
-      const articleTags = document.querySelectorAll('meta[property="article:tag"]');
-      articleTags.forEach(tag => tag.remove());
-
-      // Remove structured data
-      const structuredDataScript = document.querySelector('script[type="application/ld+json"]');
-      if (structuredDataScript) {
-        structuredDataScript.remove();
-      }
-    };
-  }, [article]);
-};
-
+// Types
 interface Article {
   id: string;
   title: string;
@@ -179,198 +28,266 @@ interface Article {
   } | null;
 }
 
-interface ArticleWidget {
-  id: string;
-  type: string;
-  title: string;
-  content: string;
-  settings: any;
-  position: number;
-}
+// ✅ Enhanced fetch function that uses cache first, then API fallback
+async function fetchArticleData(slug: string): Promise<Article | null> {
+  try {
+    // First, try to get from cache (instant)
+    console.log(`🔍 Checking cache for article: ${slug}`);
 
-export default function ArticlePage() {
-  const params = useParams();
-  const slug = params.slug as string;
-  
-  const [article, setArticle] = useState<Article | null>(null);
-  const [widgets, setWidgets] = useState<ArticleWidget[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+    // Initialize cache if not already done
+    await articleCache.initialize();
 
-  // Use custom hook to update document head for SEO
-  useDocumentHead(article);
+    // Try cache first
+    const cachedArticle = articleCache.getArticle(slug);
+    if (cachedArticle) {
+      console.log(`✅ Article "${slug}" found in cache`);
+      return cachedArticle;
+    }
 
-  useEffect(() => {
-    const fetchArticle = async () => {
+    console.log(`📡 Article "${slug}" not in cache, fetching from API...`);
+
+    // Fallback to API with multiple URL attempts
+    const possibleUrls = [
+      process.env.NEXT_PUBLIC_API_URL,
+      'http://localhost:5001',
+      'http://127.0.0.1:5001',
+    ].filter(Boolean);
+
+    for (const apiUrl of possibleUrls) {
       try {
-        setLoading(true);
-        
-        // Fetch article by slug
-        const articleResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs/post/${slug}`);
-        
-        if (!articleResponse.ok) {
-          if (articleResponse.status === 404) {
-            setError('Article not found');
-          } else {
-            setError('Failed to load article');
-          }
-          return;
-        }
-        
-        const articleData = await articleResponse.json();
-        setArticle(articleData);
+        const fullUrl = `${apiUrl}/blogs/post/${slug}`;
+        console.log('Attempting to fetch article from:', fullUrl);
 
-        // Fetch sidebar widgets
-        const widgetsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/article-widgets`);
-        if (widgetsResponse.ok) {
-          const widgetsData = await widgetsResponse.json();
-          setWidgets(widgetsData.widgets || []);
-        }
-
-        // Increment view count
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs/post/${slug}/view`, {
-          method: 'POST'
+        const response = await fetch(fullUrl, {
+          cache: 'no-store',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'NextJS-Server',
+          },
+          // Add timeout to prevent hanging
+          signal: AbortSignal.timeout(3000), // Shorter timeout for metadata generation
         });
 
-      } catch (error) {
-        console.error('Error fetching article:', error);
-        setError('Failed to load article');
-      } finally {
-        setLoading(false);
+        console.log('Response status:', response.status, 'from:', fullUrl);
+
+        if (response.ok) {
+          const article = await response.json();
+          console.log('✅ Article fetched from API:', article.title);
+          return article;
+        }
+      } catch (urlError) {
+        console.log('❌ Failed to fetch from:', apiUrl, urlError instanceof Error ? urlError.message : 'Unknown error');
+        continue; // Try next URL
       }
-    };
-
-    if (slug) {
-      fetchArticle();
     }
-  }, [slug]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen">
-        <Header />
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-        <Footer />
-      </div>
-    );
+    console.log(`❌ Article "${slug}" not found in cache or API`);
+    return null;
+  } catch (error) {
+    console.error('❌ Error fetching article for metadata:', error);
+    return null;
+  }
+}
+
+// ✅ Enhanced generateMetadata that ALWAYS returns comprehensive metadata
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  console.log('generateMetadata called for slug:', params.slug);
+
+  // Create comprehensive fallback metadata that will always work
+  const createFallbackMetadata = (slug: string): Metadata => {
+    const formattedTitle = slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    const canonicalUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://revadops.com'}/blog/${slug}`;
+
+    return {
+      title: `${formattedTitle} | RevAdOps Blog`,
+      description: 'Discover advanced AdTech solutions, revenue optimization strategies, and programmatic advertising insights on RevAdOps Blog.',
+      keywords: 'adtech, revenue optimization, programmatic advertising, header bidding, ad monetization',
+      authors: [{ name: 'RevAdOps Team' }],
+      creator: 'RevAdOps Team',
+      publisher: 'RevAdOps',
+      category: 'AdTech',
+
+      openGraph: {
+        title: `${formattedTitle} | RevAdOps Blog`,
+        description: 'Discover advanced AdTech solutions, revenue optimization strategies, and programmatic advertising insights.',
+        type: 'article',
+        url: canonicalUrl,
+        siteName: 'RevAdOps Blog',
+        locale: 'en_US',
+        publishedTime: new Date().toISOString(),
+        authors: ['RevAdOps Team'],
+        section: 'AdTech',
+      },
+
+      twitter: {
+        card: 'summary_large_image',
+        title: formattedTitle,
+        description: 'Discover advanced AdTech solutions and revenue optimization strategies.',
+        creator: '@revadops',
+        site: '@revadops',
+      },
+
+      other: {
+        'article:author': 'RevAdOps Team',
+        'article:section': 'AdTech',
+        'article:published_time': new Date().toISOString(),
+      },
+
+      alternates: {
+        canonical: canonicalUrl,
+      },
+
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
+      },
+    };
+  };
+
+  // Try to fetch article data with a very short timeout to prevent blocking
+  let article: Article | null = null;
+  try {
+    console.log('Attempting to fetch article data for metadata...');
+
+    // Use a very short timeout for metadata generation
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/blogs/post/${params.slug}`, {
+      cache: 'no-store',
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    clearTimeout(timeoutId);
+
+    if (response.ok) {
+      article = await response.json();
+      console.log('Article fetched successfully for metadata:', article?.title);
+    } else {
+      console.log('Article fetch failed with status:', response.status);
+    }
+  } catch (error) {
+    console.log('Article fetch failed or timed out for metadata, using fallback:', error instanceof Error ? error.message : 'Unknown error');
   }
 
-  if (error || !article) {
-    return (
-      <div className="min-h-screen">
-        <Header />
-        <div className="container-custom py-16">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              {error || 'Article Not Found'}
-            </h1>
-            <p className="text-gray-600 mb-8">
-              The article you&apos;re looking for doesn&apos;t exist or has been removed.
-            </p>
-            <Link
-              href="/blog"
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Back to Blog
-            </Link>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
+  // If no article found, return fallback metadata
+  if (!article) {
+    console.log('No article found for metadata generation, using fallback');
+    return createFallbackMetadata(params.slug);
   }
 
-  const breadcrumbItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Blog', href: '/blog' },
-    { label: article.title, href: `/blog/${article.slug}` }
-  ];
+  console.log('Generating dynamic metadata for article:', article.title);
 
+  const metaTitle = article.metaTitle || article.title;
+  const metaDescription = article.metaDescription || article.excerpt || 'Discover advanced AdTech solutions and revenue optimization strategies.';
+  const metaKeywords = article.metaKeywords || 'adtech, revenue optimization, programmatic advertising';
+  const canonicalUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://revadops.com'}/blog/${article.slug}`;
+  const publishedDate = article.publishedAt || new Date().toISOString();
+
+  return {
+    title: `${metaTitle} | RevAdOps Blog`,
+    description: metaDescription,
+    keywords: metaKeywords,
+    authors: [{ name: article.author || 'RevAdOps Team' }],
+    creator: article.author || 'RevAdOps Team',
+    publisher: 'RevAdOps',
+    category: article.metaCategory || article.category?.name || 'AdTech',
+
+    // Open Graph
+    openGraph: {
+      title: metaTitle,
+      description: metaDescription,
+      type: 'article',
+      url: canonicalUrl,
+      siteName: 'RevAdOps Blog',
+      locale: 'en_US',
+      ...(article.featuredImage && {
+        images: [
+          {
+            url: article.featuredImage,
+            width: 1200,
+            height: 630,
+            alt: article.title,
+          }
+        ]
+      }),
+      publishedTime: publishedDate,
+      modifiedTime: publishedDate,
+      authors: [article.author || 'RevAdOps Team'],
+      section: article.metaCategory || article.category?.name || 'AdTech',
+      tags: Array.isArray(article.tags) ? article.tags : [],
+    },
+
+    // Twitter Card
+    twitter: {
+      card: 'summary_large_image',
+      title: metaTitle,
+      description: metaDescription,
+      creator: '@revadops',
+      site: '@revadops',
+      ...(article.featuredImage && {
+        images: [article.featuredImage]
+      }),
+    },
+
+    // Additional meta tags
+    other: {
+      'article:author': article.author || 'RevAdOps Team',
+      'article:published_time': publishedDate,
+      'article:modified_time': publishedDate,
+      'article:section': article.metaCategory || article.category?.name || 'AdTech',
+      ...(metaKeywords && { 'article:tag': metaKeywords }),
+    },
+
+    // Canonical URL
+    alternates: {
+      canonical: canonicalUrl,
+    },
+
+    // Robots
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+  };
+}
+
+// ✅ Server component — fetch article + pass to client
+export default async function ArticlePage({ params }: { params: { slug: string } }) {
+  console.log('ArticlePage server component called for slug:', params.slug);
+
+  // Try to fetch article data, but don't fail if it doesn't work
+  let article: Article | null = null;
+  try {
+    article = await fetchArticleData(params.slug);
+  } catch (error) {
+    console.log('Server component article fetch failed:', error);
+  }
+
+  if (!article) {
+    console.log('No article found in server component, using notFound');
+    notFound();
+  }
+
+  console.log('Server component rendering with article:', article.title);
   return (
-    <div className="min-h-screen">
-        <Header />
-
-      <main>
-        {/* Article Hero */}
-        <ArticleHero article={article} />
-
-        {/* Article Content Layout */}
-        <section className="py-12 bg-white">
-          <div className="container-custom">
-            <div className="flex flex-col lg:flex-row gap-8">
-              {/* Main Content - 70% */}
-              <div className="lg:w-[70%]">
-                {/* Article Meta */}
-                <div className="flex flex-wrap items-center gap-4 mb-8 text-sm text-gray-600">
-                  <div className="flex items-center">
-                    <User className="h-4 w-4 mr-2" />
-                    <span>{article.author || 'RevAdOps Team'}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span>{new Date(article.publishedAt).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Eye className="h-4 w-4 mr-2" />
-                    <span>{article.viewCount} views</span>
-                  </div>
-                  {article.category && (
-                    <div className="flex items-center">
-                      <Tag className="h-4 w-4 mr-2" />
-                      <span>{article.category.name}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Featured Image */}
-                {article.featuredImage && (
-                  <div className="mb-8">
-                    <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-lg overflow-hidden">
-                      <Image
-                        src={article.featuredImage}
-                        alt={article.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 800px"
-                        priority
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Article Content */}
-                <ArticleContent content={article.content} />
-
-                {/* Tags */}
-                {article.tags && article.tags.length > 0 && (
-                  <div className="mt-8 pt-8 border-t border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Tags</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {article.tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Sidebar - 30% */}
-              <div className="lg:w-[30%]">
-                <ArticleSidebar widgets={widgets} article={article} />
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-        <Footer />
-      </div>
+    <BlogArticleClient initialArticle={article} slug={params.slug} />
   );
 }
