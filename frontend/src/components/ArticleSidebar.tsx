@@ -315,6 +315,10 @@ export default function ArticleSidebar({ widgets, article }: ArticleSidebarProps
             <div
               className="html-widget-content"
               dangerouslySetInnerHTML={{ __html: widget.content }}
+              style={{
+                width: '100%',
+                overflow: 'hidden'
+              }}
             />
           </div>
         );

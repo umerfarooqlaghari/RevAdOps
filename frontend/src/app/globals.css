@@ -110,3 +110,28 @@ body {
     padding: 0 2rem;
   }
 }
+
+/* HTML Widget Styles */
+.html-widget-content {
+  width: 100%;
+  overflow: hidden;
+}
+
+.html-widget-content * {
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+.html-widget-content img {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+.html-widget-content iframe {
+  max-width: 100% !important;
+  border: none;
+}
+
+.html-widget-content script {
+  display: block;
+}
