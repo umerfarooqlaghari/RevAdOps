@@ -5,9 +5,14 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Quote, User } from 'lucide-react';
 
 interface TestimonialItem {
+  id?: string;
   text: string;
-  author: string;
-  company: string;
+  clientName: string;
+  companyName?: string;
+  clientImage?: string;
+  // Legacy support for existing data structure
+  author?: string;
+  company?: string;
   logo?: string;
   avatar?: string;
 }
@@ -37,11 +42,33 @@ interface TestimonialsContent {
 interface DynamicTestimonialsSectionProps {
   content: TestimonialsContent;
   items?: TestimonialItem[];
+  source?: 'homepage' | 'services'; // Determines which API endpoint to use
 }
 
-const DynamicTestimonialsSection = ({ content, items }: DynamicTestimonialsSectionProps) => {
+const DynamicTestimonialsSection = ({ content, items, source = 'homepage' }: DynamicTestimonialsSectionProps) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [apiTestimonials, setApiTestimonials] = useState<TestimonialItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const sliderRef = useRef<HTMLDivElement>(null);
+
+  // Fetch testimonials from API
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/testimonials/${source}`);
+        if (response.ok) {
+          const data = await response.json();
+          setApiTestimonials(data);
+        }
+      } catch (error) {
+        console.error('Error fetching testimonials:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTestimonials();
+  }, [source]);
 
   const defaultContent = {
     title: "What Our Clients Say",
@@ -59,30 +86,44 @@ const DynamicTestimonialsSection = ({ content, items }: DynamicTestimonialsSecti
 
   const sectionData = { ...defaultContent, ...content };
 
-  // Build testimonials from either new format or legacy format
-  const testimonials: TestimonialItem[] = items || content.items || [
-    {
-      text: sectionData.testimonial_1_text || "RevAdOps increased our ad revenue by 45% in just 3 months. Their team is incredibly knowledgeable and responsive.",
-      author: sectionData.testimonial_1_author || "Sarah Johnson",
-      company: sectionData.testimonial_1_company || "TechNews Daily",
-      logo: sectionData.testimonial_1_logo,
-      avatar: sectionData.testimonial_1_avatar
-    },
-    {
-      text: sectionData.testimonial_2_text || "The fraud detection capabilities saved us thousands in invalid traffic. Highly recommend their services.",
-      author: sectionData.testimonial_2_author || "Mike Chen",
-      company: sectionData.testimonial_2_company || "Gaming Hub",
-      logo: sectionData.testimonial_2_logo,
-      avatar: sectionData.testimonial_2_avatar
-    },
-    {
-      text: sectionData.testimonial_3_text || "Professional service and outstanding results. Our fill rates improved dramatically.",
-      author: sectionData.testimonial_3_author || "Lisa Rodriguez",
-      company: sectionData.testimonial_3_company || "Mobile App Co.",
-      logo: sectionData.testimonial_3_logo,
-      avatar: sectionData.testimonial_3_avatar
-    }
-  ];
+  // Build testimonials from API data, passed items, or legacy format
+  const testimonials: TestimonialItem[] = apiTestimonials.length > 0
+    ? apiTestimonials
+    : items || content.items || [
+        {
+          text: sectionData.testimonial_1_text || "RevAdOps increased our ad revenue by 45% in just 3 months. Their team is incredibly knowledgeable and responsive.",
+          clientName: sectionData.testimonial_1_author || "Sarah Johnson",
+          companyName: sectionData.testimonial_1_company || "TechNews Daily",
+          clientImage: sectionData.testimonial_1_avatar,
+          // Legacy support
+          author: sectionData.testimonial_1_author || "Sarah Johnson",
+          company: sectionData.testimonial_1_company || "TechNews Daily",
+          logo: sectionData.testimonial_1_logo,
+          avatar: sectionData.testimonial_1_avatar
+        },
+        {
+          text: sectionData.testimonial_2_text || "The fraud detection capabilities saved us thousands in invalid traffic. Highly recommend their services.",
+          clientName: sectionData.testimonial_2_author || "Mike Chen",
+          companyName: sectionData.testimonial_2_company || "Gaming Hub",
+          clientImage: sectionData.testimonial_2_avatar,
+          // Legacy support
+          author: sectionData.testimonial_2_author || "Mike Chen",
+          company: sectionData.testimonial_2_company || "Gaming Hub",
+          logo: sectionData.testimonial_2_logo,
+          avatar: sectionData.testimonial_2_avatar
+        },
+        {
+          text: sectionData.testimonial_3_text || "Professional service and outstanding results. Our fill rates improved dramatically.",
+          clientName: sectionData.testimonial_3_author || "Lisa Rodriguez",
+          companyName: sectionData.testimonial_3_company || "Mobile App Co.",
+          clientImage: sectionData.testimonial_3_avatar,
+          // Legacy support
+          author: sectionData.testimonial_3_author || "Lisa Rodriguez",
+          company: sectionData.testimonial_3_company || "Mobile App Co.",
+          logo: sectionData.testimonial_3_logo,
+          avatar: sectionData.testimonial_3_avatar
+        }
+      ];
 
   const totalSlides = testimonials.length;
 
@@ -120,9 +161,19 @@ const DynamicTestimonialsSection = ({ content, items }: DynamicTestimonialsSecti
             {sectionData.description}
           </p>
         </div>
-
+      </div>
         {/* Testimonials Slider */}
         <div className="relative max-w-4xl mx-auto">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          ) : testimonials.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No testimonials available.</p>
+            </div>
+          ) : (
+            <>
           {/* Navigation Buttons */}
           {totalSlides > 1 && (
             <>
@@ -179,10 +230,10 @@ const DynamicTestimonialsSection = ({ content, items }: DynamicTestimonialsSecti
 
                     {/* Author Info */}
                     <div className="flex items-center justify-center space-x-4">
-                      {testimonial.avatar ? (
+                      {(testimonial.clientImage || testimonial.avatar) ? (
                         <Image
-                          src={testimonial.avatar}
-                          alt={testimonial.author}
+                          src={testimonial.clientImage || testimonial.avatar || ''}
+                          alt={testimonial.clientName || testimonial.author || ''}
                           width={60}
                           height={60}
                           className="w-15 h-15 rounded-full object-cover"
@@ -193,8 +244,14 @@ const DynamicTestimonialsSection = ({ content, items }: DynamicTestimonialsSecti
                         </div>
                       )}
                       <div className="text-center">
-                        <p className="font-semibold text-gray-900 text-lg">{testimonial.author}</p>
-                        <p className="text-gray-600">{testimonial.company}</p>
+                        <p className="font-semibold text-gray-900 text-lg">
+                          {testimonial.clientName || testimonial.author}
+                        </p>
+                        {(testimonial.companyName || testimonial.company) && (
+                          <p className="text-gray-600">
+                            {testimonial.companyName || testimonial.company}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -202,7 +259,6 @@ const DynamicTestimonialsSection = ({ content, items }: DynamicTestimonialsSecti
               ))}
             </div>
           </div>
-
           {/* Slide Indicators */}
           {totalSlides > 1 && (
             <div className="flex justify-center mt-8 space-x-2">
@@ -218,9 +274,10 @@ const DynamicTestimonialsSection = ({ content, items }: DynamicTestimonialsSecti
               ))}
             </div>
           )}
+            </>
+          )}
         </div>
-      </div>
-    </section>
+      </section>
   );
 };
 

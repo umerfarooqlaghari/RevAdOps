@@ -341,14 +341,26 @@ router.put('/expertise/bulk', [
 });
 
 // Testimonials Management Routes
-// Get all testimonials (public endpoint)
+// Get testimonials (public, limited)
 router.get('/testimonials', async (req, res) => {
   try {
-    const testimonials = await prisma.testimonial.findMany({
-      orderBy: { order: 'asc' }
-    });
+    const limitParam = parseInt(req.query.limit);
+    const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 50) : 20;
 
-    res.json({ items: testimonials });
+    // Use raw SQL with LEFT() and strip base64 data URLs to keep payload small
+    const rows = await prisma.$queryRaw`SELECT id, LEFT(text, 400) AS text, author AS "clientName", company AS "companyName", CASE WHEN avatar LIKE 'data:%' THEN NULL ELSE LEFT(avatar, 2048) END AS "clientImage", "order", "createdAt", "updatedAt"
+      FROM "testimonials"
+      ORDER BY "order" ASC
+      LIMIT ${limit}`;
+
+    const items = rows.map(t => ({
+      ...t,
+      showOnHomepage: true,
+      showOnServices: true,
+      isActive: true,
+    }));
+
+    res.json({ items });
   } catch (error) {
     console.error('Get testimonials error:', error);
     res.status(500).json({ message: 'Server error' });

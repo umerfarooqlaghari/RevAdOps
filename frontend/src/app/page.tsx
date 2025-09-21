@@ -25,12 +25,16 @@ interface ExpertiseItem {
 }
 
 interface TestimonialItem {
-  id: string;
+  id?: string;
   text: string;
-  author: string;
-  company: string;
+  clientName: string;
+  companyName?: string;
+  clientImage?: string;
+  author?: string;
+  company?: string;
+  logo?: string;
   avatar?: string;
-  order: number;
+  order?: number;
 }
 
 interface ContentData {
@@ -102,7 +106,7 @@ export default function Home() {
         <DynamicWhyChooseSection content={content.why_choose_us || {}} />
         <DynamicHowItWorksSection content={content.how_it_works || {}} />
         <DynamicExpertiseSection content={content.our_expertise || {}} items={expertiseItems} />
-        <DynamicTestimonialsSection content={content.testimonials || {}} items={testimonialItems} />
+        <DynamicTestimonialsSection content={content.testimonials || {}} items={testimonialItems} source="homepage" />
 
         <DynamicFinalCTASection content={content.final_cta || {}} />
       </main>

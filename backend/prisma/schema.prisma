@@ -58,19 +58,60 @@ model MediaAsset {
 }
 
 model Service {
+  id            String         @id @default(cuid())
+  title         String
+  description   String         @db.Text
+  shortDesc     String?
+  icon          String?
+  image         String?
+  slug          String         @unique
+  isActive      Boolean        @default(true)
+  order         Int            @default(0)
+  metaTitle     String?        // SEO meta title
+  metaDescription String?      // SEO meta description
+  metaKeywords  String?        // SEO meta keywords
+  ctaText       String?        // Call-to-action text
+  ctaLink       String?        // Call-to-action link
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  // Relations
+  images        ServiceImage[]
+  packages      ServicePackage[]
+
+  @@map("services")
+}
+
+model ServiceImage {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  order     Int      @default(0)
+  serviceId String
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("service_images")
+}
+
+model ServicePackage {
   id          String   @id @default(cuid())
   title       String
   description String   @db.Text
-  shortDesc   String?
-  icon        String?
-  image       String?
-  slug        String   @unique
-  isActive    Boolean  @default(true)
+  price       String   // Store as string to allow flexible pricing like "$120/mo"
+  features    String[] // Array of feature strings
+  isPopular   Boolean  @default(false)
   order       Int      @default(0)
+  ctaText     String   @default("Select plan")
+  ctaLink     String?
+  isActive    Boolean  @default(true)
+  serviceId   String?  // Optional - packages can be global or service-specific
+  service     Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@map("services")
+  @@map("service_packages")
 }
 
 model BlogCategory {
@@ -151,14 +192,17 @@ model Expertise {
 }
 
 model Testimonial {
-  id        String   @id @default(cuid())
-  text      String   @db.Text
-  author    String
-  company   String
-  avatar    String?
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(cuid())
+  text            String   @db.Text
+  clientName      String   @map("author") // Map to existing 'author' column
+  companyName     String?  @map("company") // Map to existing 'company' column
+  clientImage     String?  @map("avatar") // Map to existing 'avatar' column
+  showOnServices  Boolean  @default(true)
+  showOnHomepage  Boolean  @default(true)
+  isActive        Boolean  @default(true)
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@map("testimonials")
 }
