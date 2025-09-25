@@ -123,3 +123,35 @@ export interface ContactFormData {
 export interface NewsletterFormData {
   email: string;
 }
+
+export interface Script {
+  id: string;
+  code: string;
+  locations: ('head' | 'footer')[];
+  enabled: boolean;
+  title?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ScriptFormData {
+  code: string;
+  locations: ('head' | 'footer')[];
+  enabled: boolean;
+  title?: string;
+}
+
+export interface ScriptResponse {
+  message: string;
+  script: Script;
+}
+
+export interface ScriptsListResponse {
+  items: Script[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}

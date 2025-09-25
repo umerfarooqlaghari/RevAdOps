@@ -248,3 +248,15 @@ model Advertisement {
 
   @@map("advertisements")
 }
+
+model Script {
+  id        String   @id @default(cuid())
+  code      String   @db.Text // The script code itself
+  locations String[] // Array of locations: ["head"], ["footer"], or ["head", "footer"]
+  enabled   Boolean  @default(true)
+  title     String?  // Optional title for admin identification
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("scripts")
+}

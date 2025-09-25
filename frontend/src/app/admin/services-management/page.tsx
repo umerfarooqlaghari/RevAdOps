@@ -114,14 +114,36 @@ export default function ServicesManagementPage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content/services_page_content`);
       const data = await response.json();
 
+      // Define default content structure if no content exists
+      const defaultContentKeys = [
+        { key: 'transform_title', type: 'text', value: 'Ready to Transform Your Business?' },
+        { key: 'transform_subtitle', type: 'textarea', value: 'Discover how our services can help you achieve your goals.' },
+        { key: 'transform_button_text', type: 'text', value: 'Get Started Today' },
+        { key: 'transform_button_link', type: 'text', value: '/contact' },
+        { key: 'packages_title', type: 'text', value: 'Our Service Packages' },
+        { key: 'packages_subtitle', type: 'textarea', value: 'Choose the perfect package for your needs.' },
+        { key: 'packages_description', type: 'textarea', value: 'We offer flexible packages designed to meet your specific requirements.' }
+      ];
+
       // Convert API response to PageContentItem array
-      const contentItems: PageContentItem[] = Object.entries(data).map(([key, item]: [string, any]) => ({
+      let contentItems: PageContentItem[] = Object.entries(data).map(([key, item]: [string, any]) => ({
         section: 'services_page_content',
         key,
         value: item.value || '',
         type: item.type || 'text',
         order: 0
       }));
+
+      // If no content exists, create default content structure
+      if (contentItems.length === 0) {
+        contentItems = defaultContentKeys.map(item => ({
+          section: 'services_page_content',
+          key: item.key,
+          value: item.value,
+          type: item.type,
+          order: 0
+        }));
+      }
 
       setPageContent(contentItems);
       setOriginalPageContent(JSON.parse(JSON.stringify(contentItems))); // Deep copy for change detection

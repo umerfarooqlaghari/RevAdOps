@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 // import { Geist } from "next/font/google";
 
 import "./globals.css";
+import { HeadScripts, FooterScripts } from "@/components/ScriptInjector";
 
 
 // const geistSans = Geist({
@@ -40,10 +41,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <HeadScripts />
+      </head>
       <body
         // className={`${geistSans.variable} antialiased`}
       >
         {children}
+        <FooterScripts />
       </body>
     </html>
   );

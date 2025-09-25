@@ -101,7 +101,17 @@ export const endpoints = {
     register: () => '/auth/register',
     verify: () => '/auth/verify',
   },
-  
+
+  // Scripts
+  scripts: {
+    getEnabled: () => '/scripts/enabled',
+    getAll: () => '/scripts/admin/all',
+    getById: (id: string) => `/scripts/${id}`,
+    create: () => '/scripts',
+    update: (id: string) => `/scripts/${id}`,
+    delete: (id: string) => `/scripts/${id}`,
+  },
+
   // Health
   health: () => '/health',
 };

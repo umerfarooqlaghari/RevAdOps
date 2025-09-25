@@ -5,6 +5,14 @@ import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Middleware to check admin role
+const adminAuth = (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Admin access required' });
+  }
+  next();
+};
+
 // Simple rate limiting for content updates
 const updateLimiter = new Map();
 const RATE_LIMIT_WINDOW = 3000; // 3 seconds
@@ -64,7 +72,7 @@ router.get('/:section', async (req, res) => {
 });
 
 // Update content
-router.put('/:section/:key', authenticateToken, checkRateLimit, [
+router.put('/:section/:key', authenticateToken, adminAuth, checkRateLimit, [
   body('value').notEmpty(),
   body('type').optional().isIn(['text', 'image', 'html'])
 ], async (req, res) => {
@@ -107,7 +115,7 @@ router.put('/:section/:key', authenticateToken, checkRateLimit, [
 });
 
 // Optimized bulk update content for a section
-router.put('/:section', authenticateToken, checkRateLimit, async (req, res) => {
+router.put('/:section', authenticateToken, adminAuth, checkRateLimit, async (req, res) => {
   try {
     const { section } = req.params;
     const { content } = req.body;
