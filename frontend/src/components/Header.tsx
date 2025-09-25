@@ -25,9 +25,9 @@ const Header = () => {
             <Image
               src="/logo.svg"
               alt="RevAdOps Logo"
-              width={180}
-              height={60}
-              className="h-16 w-auto transition-transform duration-200 hover:scale-105"
+              width={300}
+              height={100}
+              className="h-26 w-auto transition-transform duration-200 hover:scale-105"
               priority
             />
           </Link>

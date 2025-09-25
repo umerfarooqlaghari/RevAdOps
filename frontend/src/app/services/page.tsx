@@ -18,6 +18,9 @@ interface ServicesContent {
   hero: ContentSection;
   services_intro: ContentSection;
   testimonials: ContentSection;
+  services_appointment?: ContentSection;
+  services_packages?: ContentSection;
+  services_page_content?: ContentSection;
 }
 
 interface Service {
@@ -72,7 +75,9 @@ export default function ServicesPage() {
   const [content, setContent] = useState<ServicesContent>({
     hero: {},
     services_intro: {},
-    testimonials: {}
+    testimonials: {},
+    services_appointment: {},
+    services_packages: {},
   });
   const [services, setServices] = useState<Service[]>([]);
   const [packages, setPackages] = useState<ServicePackage[]>([]);
@@ -86,11 +91,29 @@ export default function ServicesPage() {
         const contentResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content`);
         const contentData = await contentResponse.json();
 
+        // Transform services_page_content to extract values
+        const transformContentSection = (section: Record<string, unknown>) => {
+          if (!section || typeof section !== 'object') return {};
+          const transformed: Record<string, string> = {};
+          Object.entries(section).forEach(([key, item]) => {
+            if (typeof item === 'object' && item !== null && 'value' in item) {
+              transformed[key] = String((item as { value: unknown }).value || '');
+            } else {
+              transformed[key] = String(item || '');
+            }
+          });
+          return transformed;
+        };
+
         const servicesContent = {
           hero: contentData.services_hero || {},
           services_intro: contentData.services_intro || {},
-          testimonials: contentData.testimonials || {}
+          testimonials: contentData.testimonials || {},
+          services_appointment: contentData.services_appointment || {},
+          services_packages: contentData.services_packages || {},
+          services_page_content: transformContentSection(contentData.services_page_content),
         };
+
         setContent(servicesContent);
 
         // Fetch services
@@ -157,7 +180,7 @@ export default function ServicesPage() {
         />
 
         {/* Service Packages Section */}
-        <ServicePackagesSection packages={packages} />
+        <ServicePackagesSection packages={packages} content={content.services_page_content} />
 
         {/* Testimonials Section */}
         <DynamicTestimonialsSection
@@ -167,7 +190,7 @@ export default function ServicesPage() {
         />
 
         {/* Schedule Appointment CTA Section */}
-        <ScheduleAppointmentSection />
+        <ScheduleAppointmentSection content={content.services_page_content} />
 
         {/* Blog Slider Section */}
         <BlogSliderSection />

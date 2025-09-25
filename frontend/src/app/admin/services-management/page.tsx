@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, Image as ImageIcon, Package, Save, X } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Edit, Trash2, Eye, Image as ImageIcon, Package, Save, X, Type } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
@@ -65,12 +65,20 @@ interface ServiceFormData {
   images: Array<{ url: string; alt: string; order: number }>;
 }
 
+interface PageContentItem {
+  section: string;
+  key: string;
+  value: string;
+  type: string;
+  order?: number;
+}
+
 export default function ServicesManagementPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
-  const [activeTab, setActiveTab] = useState<'services' | 'packages'>('services');
+  const [activeTab, setActiveTab] = useState<'services' | 'packages' | 'page-content'>('services');
   const [formData, setFormData] = useState<ServiceFormData>({
     title: '',
     description: '',
@@ -87,10 +95,100 @@ export default function ServicesManagementPage() {
     ctaLink: '',
     images: []
   });
+  const [pageContent, setPageContent] = useState<PageContentItem[]>([]);
+  const [originalPageContent, setOriginalPageContent] = useState<PageContentItem[]>([]);
+  const [isLoadingPageContent, setIsLoadingPageContent] = useState(false);
+  const [isSavingPageContent, setIsSavingPageContent] = useState(false);
 
   useEffect(() => {
     fetchServices();
+    fetchPageContent();
   }, []);
+
+  const fetchPageContent = useCallback(async () => {
+    try {
+      setIsLoadingPageContent(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content/services_page_content`);
+      const data = await response.json();
+
+      // Convert API response to PageContentItem array
+      const contentItems: PageContentItem[] = Object.entries(data).map(([key, item]: [string, any]) => ({
+        section: 'services_page_content',
+        key,
+        value: item.value || '',
+        type: item.type || 'text',
+        order: 0
+      }));
+
+      setPageContent(contentItems);
+      setOriginalPageContent(JSON.parse(JSON.stringify(contentItems))); // Deep copy for change detection
+    } catch (error) {
+      console.error('Error fetching page content:', error);
+      toast.error('Failed to load page content');
+    } finally {
+      setIsLoadingPageContent(false);
+    }
+  }, []);
+
+  const handlePageContentChange = (key: string, value: string) => {
+    setPageContent(prev =>
+      prev.map(item =>
+        item.key === key ? { ...item, value } : item
+      )
+    );
+  };
+
+  const savePageContent = async () => {
+    try {
+      setIsSavingPageContent(true);
+      const token = localStorage.getItem('adminToken');
+
+      // Only save items that have changed
+      const changedItems: { [key: string]: { value: string; type: string } } = {};
+
+      pageContent.forEach(item => {
+        const originalItem = originalPageContent.find(orig => orig.key === item.key);
+        if (!originalItem || originalItem.value !== item.value) {
+          changedItems[item.key] = {
+            value: item.value,
+            type: item.type
+          };
+        }
+      });
+
+      // Only make API call if there are changes
+      if (Object.keys(changedItems).length === 0) {
+        toast.success('No changes to save');
+        return;
+      }
+
+      console.log('Saving changed items:', changedItems);
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/content/services_page_content`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content: changedItems }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Save error:', errorData);
+        toast.error('Failed to save content: ' + (errorData.message || 'Unknown error'));
+        return;
+      }
+
+      toast.success('Page content saved successfully!');
+      await fetchPageContent(); // Refresh to get updated data
+    } catch (error) {
+      console.error('Save error:', error);
+      toast.error('Failed to save content');
+    } finally {
+      setIsSavingPageContent(false);
+    }
+  };
 
   const fetchServices = async () => {
     try {
@@ -306,6 +404,16 @@ export default function ServicesManagementPage() {
             >
               Service Packages
             </button>
+            <button
+              onClick={() => setActiveTab('page-content')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'page-content'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Page Content
+            </button>
           </nav>
         </div>
 
@@ -412,6 +520,94 @@ export default function ServicesManagementPage() {
 
         {activeTab === 'packages' && (
           <ServicePackages services={services.map(s => ({ id: s.id, title: s.title, slug: s.slug }))} />
+        )}
+
+        {activeTab === 'page-content' && (
+          <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-gray-900">Services Page Content</h2>
+              <button
+                onClick={savePageContent}
+                disabled={isSavingPageContent}
+                className="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <Save className="mr-2 h-4 w-4" />
+                {isSavingPageContent ? 'Saving...' : 'Save All Changes'}
+              </button>
+            </div>
+
+            {isLoadingPageContent ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : (
+              <div className="p-6 space-y-8">
+                {/* Transform Business Section */}
+                <div className="bg-blue-50 p-6 rounded-lg">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Ready to Transform Your Business? Section</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {pageContent.filter(item => item.key.startsWith('transform_')).map((item) => (
+                      <div key={item.key} className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700 capitalize">
+                          <Type className="inline mr-2 h-4 w-4" />
+                          {item.key.replace(/transform_|_/g, ' ').trim()}
+                        </label>
+                        {item.type === 'textarea' ? (
+                          <textarea
+                            value={item.value}
+                            onChange={(e) => handlePageContentChange(item.key, e.target.value)}
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 bg-white"
+                            placeholder={`Enter ${item.key.replace(/transform_|_/g, ' ').trim()}`}
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            value={item.value}
+                            onChange={(e) => handlePageContentChange(item.key, e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 bg-white"
+                            placeholder={`Enter ${item.key.replace(/transform_|_/g, ' ').trim()}`}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Packages Section */}
+                <div className="bg-green-50 p-6 rounded-lg">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Packages Section Content</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {pageContent.filter(item => item.key.startsWith('packages_')).map((item) => (
+                      <div key={item.key} className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700 capitalize">
+                          <Type className="inline mr-2 h-4 w-4" />
+                          {item.key.replace(/packages_|_/g, ' ').trim()}
+                        </label>
+                        {item.type === 'textarea' ? (
+                          <textarea
+                            value={item.value}
+                            onChange={(e) => handlePageContentChange(item.key, e.target.value)}
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 bg-white"
+                            placeholder={`Enter ${item.key.replace(/packages_|_/g, ' ').trim()}`}
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            value={item.value}
+                            onChange={(e) => handlePageContentChange(item.key, e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 bg-white"
+                            placeholder={`Enter ${item.key.replace(/packages_|_/g, ' ').trim()}`}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Service Modal */}

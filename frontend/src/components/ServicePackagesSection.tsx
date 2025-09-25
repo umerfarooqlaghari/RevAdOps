@@ -15,11 +15,22 @@ interface ServicePackage {
   isActive: boolean;
 }
 
-interface ServicePackagesSectionProps {
-  packages: ServicePackage[];
+interface PackagesContent {
+  packages_header_title?: string;
+  packages_header_description?: string;
+  packages_info_line_1?: string;
+  packages_info_line_2?: string;
+  packages_info_link_text?: string;
+  packages_info_link_href?: string;
+  packages_info_link_suffix?: string;
 }
 
-export default function ServicePackagesSection({ packages }: ServicePackagesSectionProps) {
+interface ServicePackagesSectionProps {
+  packages: ServicePackage[];
+  content?: PackagesContent;
+}
+
+export default function ServicePackagesSection({ packages, content = {} }: ServicePackagesSectionProps) {
   // Filter active packages and sort by order
   const activePackages = packages
     .filter(pkg => pkg.isActive)
@@ -29,18 +40,16 @@ export default function ServicePackagesSection({ packages }: ServicePackagesSect
     return null; // Don't render section if no packages
   }
 
-  
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-            Flexible Plans
+            {content.packages_header_title || 'Flexible Plans'}
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-            Lorem Ipsum has been the industry&apos;s standard dummy text ever
+            {content.packages_header_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever"}
           </p>
         </div>
 
@@ -50,8 +59,8 @@ export default function ServicePackagesSection({ packages }: ServicePackagesSect
             <div
               key={pkg.id}
               className={`relative bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 ${
-                pkg.isPopular 
-                  ? 'ring-2 ring-purple-500 transform scale-105' 
+                pkg.isPopular
+                  ? 'ring-2 ring-purple-500 transform scale-105'
                   : 'hover:-translate-y-2'
               }`}
             >
@@ -116,10 +125,16 @@ export default function ServicePackagesSection({ packages }: ServicePackagesSect
         {/* Additional Info */}
         <div className="text-center mt-12">
           <p className="text-gray-600">
-            All plans include 24/7 support and a 30-day money-back guarantee.
+            {content.packages_info_line_1 || 'All plans include 24/7 support and a 30-day money-back guarantee.'}
           </p>
           <p className="text-sm text-gray-500 mt-2">
-            Need a custom solution? <a href="#contact" className="text-blue-600 hover:text-blue-800">Contact us</a> for enterprise pricing.
+            {content.packages_info_line_2 ? (
+              <>
+                {content.packages_info_line_2} <a href={content.packages_info_link_href || '#contact'} className="text-blue-600 hover:text-blue-800">{content.packages_info_link_text || 'Contact us'}</a> {content.packages_info_link_suffix || 'for enterprise pricing.'}
+              </>
+            ) : (
+              <>Need a custom solution? <a href={content.packages_info_link_href || '#contact'} className="text-blue-600 hover:text-blue-800">{content.packages_info_link_text || 'Contact us'}</a> {content.packages_info_link_suffix || 'for enterprise pricing.'}</>
+            )}
           </p>
         </div>
       </div>
