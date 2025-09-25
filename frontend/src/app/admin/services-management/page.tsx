@@ -103,6 +103,7 @@ export default function ServicesManagementPage() {
   const [isLoadingPageContent, setIsLoadingPageContent] = useState(false);
   const [isSavingPageContent, setIsSavingPageContent] = useState(false);
 
+
   useEffect(() => {
     fetchServices();
     fetchPageContent();
@@ -116,37 +117,76 @@ export default function ServicesManagementPage() {
 
       // Define default content structure if no content exists
       const defaultContentKeys = [
-        { key: 'transform_title', type: 'text', value: 'Ready to Transform Your Business?' },
-        { key: 'transform_subtitle', type: 'textarea', value: 'Discover how our services can help you achieve your goals.' },
-        { key: 'transform_button_text', type: 'text', value: 'Get Started Today' },
-        { key: 'transform_button_link', type: 'text', value: '/contact' },
-        { key: 'packages_title', type: 'text', value: 'Our Service Packages' },
-        { key: 'packages_subtitle', type: 'textarea', value: 'Choose the perfect package for your needs.' },
-        { key: 'packages_description', type: 'textarea', value: 'We offer flexible packages designed to meet your specific requirements.' }
+        // Ready to Transform Your Business Section (ScheduleAppointmentSection)
+        { key: 'transform_header', type: 'text', value: 'Ready to Transform Your Business?' },
+        { key: 'transform_subheading', type: 'textarea', value: 'Schedule a free 30-minute consultation with our experts to discuss your goals and discover how our services can help you achieve them.' },
+        { key: 'transform_checkpoint_1', type: 'text', value: 'Free 30-minute consultation' },
+        { key: 'transform_checkpoint_2', type: 'text', value: 'Personalized strategy recommendations' },
+        { key: 'transform_checkpoint_3', type: 'text', value: 'No obligation or commitment required' },
+        { key: 'transform_checkpoint_4', type: 'text', value: 'Expert insights and industry best practices' },
+        { key: 'transform_cta_primary_text', type: 'text', value: 'Schedule Free Consultation' },
+        { key: 'transform_cta_primary_link', type: 'text', value: 'https://calendly.com/silviasam91/30min' },
+        { key: 'transform_cta_secondary_text', type: 'text', value: 'Call Us Now' },
+        { key: 'transform_cta_secondary_link', type: 'text', value: '/contact' },
+
+        // Quick & Easy Scheduling Section (ScheduleAppointmentSection)
+        { key: 'transform_scheduling_title', type: 'text', value: 'Quick & Easy Scheduling' },
+        { key: 'transform_scheduling_subtitle', type: 'text', value: 'Book your consultation in just a few clicks' },
+        { key: 'transform_step_1_title', type: 'text', value: 'Choose your preferred time' },
+        { key: 'transform_step_1_desc', type: 'text', value: 'Select from available slots' },
+        { key: 'transform_step_2_title', type: 'text', value: 'Share your goals' },
+        { key: 'transform_step_2_desc', type: 'text', value: 'Tell us about your business needs' },
+        { key: 'transform_step_3_title', type: 'text', value: 'Get expert advice' },
+        { key: 'transform_step_3_desc', type: 'text', value: 'Receive personalized recommendations' },
+
+        // Analytics/Stats Section (ScheduleAppointmentSection)
+        { key: 'transform_stat_1_value', type: 'text', value: '500+' },
+        { key: 'transform_stat_1_label', type: 'text', value: 'Consultations' },
+        { key: 'transform_stat_2_value', type: 'text', value: '98%' },
+        { key: 'transform_stat_2_label', type: 'text', value: 'Satisfaction' },
+        { key: 'transform_stat_3_value', type: 'text', value: '24/7' },
+        { key: 'transform_stat_3_label', type: 'text', value: 'Support' },
+
+        // Flexible Plans Section (ServicePackagesSection)
+        { key: 'packages_header_title', type: 'text', value: 'Flexible Plans' },
+        { key: 'packages_header_description', type: 'textarea', value: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever' },
+        { key: 'packages_info_line_1', type: 'text', value: 'All plans include 24/7 support and a 30-day money-back guarantee.' },
+        { key: 'packages_info_line_2', type: 'text', value: 'Need a custom solution?' },
+        { key: 'packages_info_link_text', type: 'text', value: 'Contact us' },
+        { key: 'packages_info_link_href', type: 'text', value: '/contact' },
+        { key: 'packages_info_link_suffix', type: 'text', value: 'for enterprise pricing.' }
       ];
 
-      // Convert API response to PageContentItem array
-      let contentItems: PageContentItem[] = Object.entries(data).map(([key, item]: [string, any]) => ({
+      // Convert API response to PageContentItem array (only existing items from DB)
+      const existingItems: PageContentItem[] = Object.entries(data).map(([key, item]: [string, any]) => ({
         section: 'services_page_content',
         key,
-        value: item.value || '',
-        type: item.type || 'text',
+        value: (item && typeof item === 'object' && 'value' in item) ? (item.value || '') : (item as any) || '',
+        type: (item && typeof item === 'object' && 'type' in item) ? item.type : 'text',
         order: 0
       }));
 
-      // If no content exists, create default content structure
-      if (contentItems.length === 0) {
-        contentItems = defaultContentKeys.map(item => ({
-          section: 'services_page_content',
-          key: item.key,
-          value: item.value,
-          type: item.type,
-          order: 0
-        }));
-      }
+      // Build a set of existing keys returned by the API
+      const existingKeysSet = new Set(existingItems.map(i => i.key));
 
-      setPageContent(contentItems);
-      setOriginalPageContent(JSON.parse(JSON.stringify(contentItems))); // Deep copy for change detection
+      // Merge in any missing defaults so UI always shows the full schema
+      const mergedItems: PageContentItem[] = [
+        ...existingItems,
+        ...defaultContentKeys
+          .filter(def => !existingKeysSet.has(def.key))
+          .map(def => ({
+            section: 'services_page_content',
+            key: def.key,
+            value: def.value,
+            type: def.type,
+            order: 0
+          }))
+      ];
+
+      console.log('Content items loaded (existing + defaults):', mergedItems);
+      setPageContent(mergedItems);
+      // For change detection, only keep the original values that existed in DB
+      setOriginalPageContent(JSON.parse(JSON.stringify(existingItems)));
     } catch (error) {
       console.error('Error fetching page content:', error);
       toast.error('Failed to load page content');
@@ -571,7 +611,11 @@ export default function ServicesManagementPage() {
                 <div className="bg-blue-50 p-6 rounded-lg">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4">Ready to Transform Your Business? Section</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {pageContent.filter(item => item.key.startsWith('transform_')).map((item) => (
+                    {(() => {
+                      const filtered = pageContent.filter(item => item.key.startsWith('transform_') && !item.key.includes('scheduling') && !item.key.includes('step') && !item.key.includes('stat'));
+                      console.log('Transform section filtered items:', filtered);
+                      return filtered;
+                    })().map((item) => (
                       <div key={item.key} className="space-y-2">
                         <label className="block text-sm font-medium text-gray-700 capitalize">
                           <Type className="inline mr-2 h-4 w-4" />
@@ -599,9 +643,63 @@ export default function ServicesManagementPage() {
                   </div>
                 </div>
 
-                {/* Packages Section */}
+                {/* Quick & Easy Scheduling Section */}
+                <div className="bg-purple-50 p-6 rounded-lg">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Quick & Easy Scheduling Section</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {pageContent.filter(item => item.key.includes('scheduling') || item.key.includes('step')).map((item) => (
+                      <div key={item.key} className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700 capitalize">
+                          <Type className="inline mr-2 h-4 w-4" />
+                          {item.key.replace(/transform_|scheduling_|step_|_/g, ' ').trim()}
+                        </label>
+                        {item.type === 'textarea' ? (
+                          <textarea
+                            value={item.value}
+                            onChange={(e) => handlePageContentChange(item.key, e.target.value)}
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 bg-white"
+                            placeholder={`Enter ${item.key.replace(/transform_|scheduling_|step_|_/g, ' ').trim()}`}
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            value={item.value}
+                            onChange={(e) => handlePageContentChange(item.key, e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 bg-white"
+                            placeholder={`Enter ${item.key.replace(/transform_|scheduling_|step_|_/g, ' ').trim()}`}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Statistics Section */}
+                <div className="bg-yellow-50 p-6 rounded-lg">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Statistics/Analytics Section</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {pageContent.filter(item => item.key.includes('stat_')).map((item) => (
+                      <div key={item.key} className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700 capitalize">
+                          <Type className="inline mr-2 h-4 w-4" />
+                          {item.key.replace(/transform_|stat_|_/g, ' ').trim()}
+                        </label>
+                        <input
+                          type="text"
+                          value={item.value}
+                          onChange={(e) => handlePageContentChange(item.key, e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 bg-white"
+                          placeholder={`Enter ${item.key.replace(/transform_|stat_|_/g, ' ').trim()}`}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Flexible Plans Section */}
                 <div className="bg-green-50 p-6 rounded-lg">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Packages Section Content</h4>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Flexible Plans Section</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {pageContent.filter(item => item.key.startsWith('packages_')).map((item) => (
                       <div key={item.key} className="space-y-2">
