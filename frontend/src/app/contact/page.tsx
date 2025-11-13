@@ -2,27 +2,17 @@
 
 import DynamicContactHeroSection from '@/components/DynamicContactHeroSection';
 import DynamicContactInfoSection from '@/components/DynamicContactInfoSection';
-import DynamicContactFormSection from '@/components/DynamicContactFormSection';
-import DynamicContactMapSection from '@/components/DynamicContactMapSection';
 import { useState, useEffect } from 'react';
 
-interface ContentSection {
-  [key: string]: string;
-}
-
 interface ContactContent {
-  hero: ContentSection;
-  info: ContentSection;
-  form: ContentSection;
-  map: ContentSection;
+  hero: Record<string, string>;
+  info: Record<string, string>;
 }
 
 export default function ContactPage() {
   const [content, setContent] = useState<ContactContent>({
     hero: {},
-    info: {},
-    form: {},
-    map: {}
+    info: {}
   });
   const [loading, setLoading] = useState(true);
 
@@ -35,9 +25,7 @@ export default function ContactPage() {
         // Extract contact-related content
         const contactContent = {
           hero: data.contact_hero || {},
-          info: data.contact_info || {},
-          form: data.contact_form || {},
-          map: data.contact_map || {}
+          info: data.contact_info || {}
         };
 
         setContent(contactContent);
@@ -74,8 +62,6 @@ export default function ContactPage() {
     <div className="min-h-screen">
       <DynamicContactHeroSection content={content.hero} />
       <DynamicContactInfoSection content={content.info} />
-      <DynamicContactFormSection content={content.form} />
-      <DynamicContactMapSection content={content.map} />
     </div>
   );
 }

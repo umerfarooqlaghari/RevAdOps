@@ -5,7 +5,8 @@ import {
   FileText,
   Image,
   Users,
-  Eye
+  Eye,
+  Phone
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -164,6 +165,17 @@ export default function AdminDashboard() {
               <div>
                 <p className="font-medium text-gray-900">Edit About Page</p>
                 <p className="text-sm text-gray-600">Update about us content and director info</p>
+              </div>
+            </a>
+
+            <a
+              href="/admin/contact"
+              className="flex items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors duration-200"
+            >
+              <Phone className="h-5 w-5 text-purple-500 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">Edit Contact Page</p>
+                <p className="text-sm text-gray-600">Update contact information and form settings</p>
               </div>
             </a>
 

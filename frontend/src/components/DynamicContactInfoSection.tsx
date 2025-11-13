@@ -1,22 +1,12 @@
 'use client';
 
-import { 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Clock, 
-  MessageCircle, 
-  Users, 
-  Award, 
-  Headphones 
-} from 'lucide-react';
+import { Phone, Mail, MapPin, Building2 } from 'lucide-react';
 
 interface ContactInfoProps {
   content: {
     title?: string;
     subtitle?: string;
     description?: string;
-    // Office info
     office_1_name?: string;
     office_1_address?: string;
     office_1_phone?: string;
@@ -25,201 +15,103 @@ interface ContactInfoProps {
     office_2_address?: string;
     office_2_phone?: string;
     office_2_email?: string;
-    // Support info
-    support_title?: string;
-    support_description?: string;
-    support_hours?: string;
-    support_phone?: string;
-    support_email?: string;
-    // Features
-    feature_1_title?: string;
-    feature_1_description?: string;
-    feature_1_icon?: string;
-    feature_2_title?: string;
-    feature_2_description?: string;
-    feature_2_icon?: string;
-    feature_3_title?: string;
-    feature_3_description?: string;
-    feature_3_icon?: string;
-    feature_4_title?: string;
-    feature_4_description?: string;
-    feature_4_icon?: string;
+    office_3_name?: string;
+    office_3_address?: string;
+    office_3_phone?: string;
+    office_3_email?: string;
   };
 }
-
-const iconMap: { [key: string]: React.ComponentType<{className?: string}> } = {
-  phone: Phone,
-  mail: Mail,
-  map: MapPin,
-  clock: Clock,
-  message: MessageCircle,
-  users: Users,
-  award: Award,
-  headphones: Headphones,
-};
 
 export default function DynamicContactInfoSection({ content }: ContactInfoProps) {
   const offices = [
     {
-      name: content.office_1_name || 'Main Office',
-      address: content.office_1_address || '123 Business Street, Suite 100\nNew York, NY 10001',
-      phone: content.office_1_phone || '+1 (555) 123-4567',
-      email: content.office_1_email || 'ny@revadops.com',
+      name: content?.office_1_name || 'Main Office',
+      address: content?.office_1_address || '123 Business Street, Suite 100\nNew York, NY 10001',
+      phone: content?.office_1_phone || '+1 (555) 123-4567',
+      email: content?.office_1_email || 'ny@revadops.com',
     },
     {
-      name: content.office_2_name || 'West Coast Office',
-      address: content.office_2_address || '456 Innovation Ave, Floor 5\nSan Francisco, CA 94105',
-      phone: content.office_2_phone || '+1 (555) 987-6543',
-      email: content.office_2_email || 'sf@revadops.com',
-    },
-  ];
-
-  const features = [
-    {
-      title: content.feature_1_title || '24/7 Support',
-      description: content.feature_1_description || 'Round-the-clock assistance for all your needs.',
-      icon: content.feature_1_icon || 'headphones',
+      name: content?.office_2_name || 'West Coast Office',
+      address: content?.office_2_address || '456 Innovation Ave, Floor 5\nSan Francisco, CA 94105',
+      phone: content?.office_2_phone || '+1 (555) 987-6543',
+      email: content?.office_2_email || 'sf@revadops.com',
     },
     {
-      title: content.feature_2_title || 'Expert Team',
-      description: content.feature_2_description || 'Experienced professionals ready to help.',
-      icon: content.feature_2_icon || 'users',
-    },
-    {
-      title: content.feature_3_title || 'Quick Response',
-      description: content.feature_3_description || 'Fast response times to your inquiries.',
-      icon: content.feature_3_icon || 'message',
-    },
-    {
-      title: content.feature_4_title || 'Proven Results',
-      description: content.feature_4_description || 'Track record of successful partnerships.',
-      icon: content.feature_4_icon || 'award',
-    },
+      name: content?.office_3_name || 'European Office',
+      address: content?.office_3_address || '789 Tech Park, Building C\nLondon, UK EC1A 1BB',
+      phone: content?.office_3_phone || '+44 20 1234 5678',
+      email: content?.office_3_email || 'london@revadops.com',
+    }
   ];
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
         <div className="text-center mb-16">
-          {content.subtitle && (
-            <p className="text-blue-600 font-semibold text-lg mb-4">
-              {content.subtitle}
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            {content?.title || 'Our Offices'}
+          </h2>
+          {content?.description && (
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              {content.description}
             </p>
           )}
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-            {content.title || 'Multiple Ways to Reach Us'}
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            {content.description || 'Choose the most convenient way to get in touch with our team.'}
-          </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 mb-16">
-          {/* Office Locations */}
-          <div className="lg:col-span-2">
-            <h3 className="text-2xl font-bold text-gray-900 mb-8">Our Offices</h3>
-            <div className="grid md:grid-cols-2 gap-8">
-              {offices.map((office, index) => (
-                <div key={index} className="bg-white rounded-xl p-8 shadow-lg">
-                  <h4 className="text-xl font-bold text-gray-900 mb-4">{office.name}</h4>
-                  
-                  <div className="space-y-4">
-                    <div className="flex items-start">
-                      <MapPin className="h-5 w-5 text-blue-600 mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <div className="text-sm text-gray-500 mb-1">Address</div>
-                        <div className="text-gray-900 whitespace-pre-line">{office.address}</div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <Phone className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0" />
-                      <div>
-                        <div className="text-sm text-gray-500 mb-1">Phone</div>
-                        <a href={`tel:${office.phone}`} className="text-gray-900 hover:text-blue-600 transition-colors">
-                          {office.phone}
-                        </a>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <Mail className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0" />
-                      <div>
-                        <div className="text-sm text-gray-500 mb-1">Email</div>
-                        <a href={`mailto:${office.email}`} className="text-gray-900 hover:text-blue-600 transition-colors">
-                          {office.email}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
+        {/* Office Cards - 3 in a row */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {offices.map((office, index) => (
+            <div key={index} className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200 hover:shadow-2xl hover:border-blue-300 transition-all duration-300">
+              {/* Office Name with Icon */}
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl mb-4 shadow-lg">
+                  <Building2 className="h-8 w-8 text-white" />
                 </div>
-              ))}
-            </div>
-          </div>
+                <h3 className="text-xl font-bold text-gray-900">{office.name}</h3>
+              </div>
 
-          {/* Support Information */}
-          <div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-8">Support Center</h3>
-            <div className="bg-blue-600 text-white rounded-xl p-8">
-              <h4 className="text-xl font-bold mb-4">
-                {content.support_title || 'Need Help?'}
-              </h4>
-              
-              <p className="text-blue-100 mb-6">
-                {content.support_description || 'Our support team is here to assist you with any questions or concerns.'}
-              </p>
-              
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <Clock className="h-5 w-5 mr-3" />
-                  <div>
-                    <div className="text-sm text-blue-200">Hours</div>
-                    <div>{content.support_hours || 'Mon-Fri: 9AM-6PM EST'}</div>
+              {/* Office Details */}
+              <div className="space-y-5">
+                {/* Address */}
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-10 h-10 bg-white-100 rounded-lg flex items-center justify-center mr-3">
+                    <MapPin className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Address</p>
+                    <p className="text-sm text-gray-900 whitespace-pre-line leading-relaxed">{office.address}</p>
                   </div>
                 </div>
-                
-                <div className="flex items-center">
-                  <Phone className="h-5 w-5 mr-3" />
-                  <div>
-                    <div className="text-sm text-blue-200">Support Phone</div>
-                    <a href={`tel:${content.support_phone || '+15551234567'}`} className="hover:text-blue-200 transition-colors">
-                      {content.support_phone || '+1 (555) 123-4567'}
+
+                {/* Phone */}
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-10 h-10 bg-white-100 rounded-lg flex items-center justify-center mr-3">
+                    <Phone className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Phone</p>
+                    <a href={`tel:${office.phone.replace(/\D/g, '')}`} className="text-sm text-gray-900 hover:text-blue-600 transition-colors font-medium">
+                      {office.phone}
                     </a>
                   </div>
                 </div>
-                
-                <div className="flex items-center">
-                  <Mail className="h-5 w-5 mr-3" />
-                  <div>
-                    <div className="text-sm text-blue-200">Support Email</div>
-                    <a href={`mailto:${content.support_email || 'support@revadops.com'}`} className="hover:text-blue-200 transition-colors">
-                      {content.support_email || 'support@revadops.com'}
+
+                {/* Email */}
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-10 h-10 bg-white-100 rounded-lg flex items-center justify-center mr-3">
+                    <Mail className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Email</p>
+                    <a href={`mailto:${office.email}`} className="text-sm text-gray-900 hover:text-blue-600 transition-colors font-medium break-all">
+                      {office.email}
                     </a>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Features */}
-        <div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Why Choose Us</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => {
-              const IconComponent = iconMap[feature.icon] || Headphones;
-              
-              return (
-                <div key={index} className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-                    <IconComponent className="h-8 w-8 text-blue-600" />
-                  </div>
-                  <h4 className="text-lg font-bold text-gray-900 mb-2">{feature.title}</h4>
-                  <p className="text-gray-600">{feature.description}</p>
-                </div>
-              );
-            })}
-          </div>
+          ))}
         </div>
       </div>
     </section>
