@@ -17,7 +17,8 @@ import {
   Tag,
   Briefcase,
   MessageSquare,
-  Code
+  Code,
+  Phone
 } from 'lucide-react';
 
 interface AdminUser {
@@ -93,6 +94,7 @@ export default function AdminLayout({
     { name: 'Dashboard', href: '/admin/dashboard', icon: Home },
     { name: 'Homepage Content', href: '/admin/homepage', icon: FileText },
     { name: 'About Us Content', href: '/admin/about', icon: FileText },
+    { name: 'Contact Us Content', href: '/admin/contact', icon: Phone },
     { name: 'Services Management', href: '/admin/services-management', icon: Briefcase },
     { name: 'Testimonials', href: '/admin/testimonials', icon: MessageSquare },
     { name: 'Articles', href: '/admin/articles', icon: FileText },
