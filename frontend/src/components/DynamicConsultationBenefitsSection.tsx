@@ -77,21 +77,21 @@ export default function DynamicConsultationBenefitsSection({ content }: Consulta
       description: content.benefit_3_description || 'Understand your competitive landscape and identify opportunities.',
       icon: content.benefit_3_icon || 'trending',
     },
-    {
-      title: content.benefit_4_title || 'Actionable Recommendations',
-      description: content.benefit_4_description || 'Walk away with clear, actionable steps to improve your marketing.',
-      icon: content.benefit_4_icon || 'lightbulb',
-    },
-    {
-      title: content.benefit_5_title || 'No Pressure Approach',
-      description: content.benefit_5_description || 'Honest advice with no obligation to purchase our services.',
-      icon: content.benefit_5_icon || 'check',
-    },
-    {
-      title: content.benefit_6_title || 'Quick Turnaround',
-      description: content.benefit_6_description || 'Get insights and recommendations within 24-48 hours.',
-      icon: content.benefit_6_icon || 'clock',
-    },
+    // {
+    //   title: content.benefit_4_title || 'Actionable Recommendations',
+    //   description: content.benefit_4_description || 'Walk away with clear, actionable steps to improve your marketing.',
+    //   icon: content.benefit_4_icon || 'lightbulb',
+    // },
+    // {
+    //   title: content.benefit_5_title || 'No Pressure Approach',
+    //   description: content.benefit_5_description || 'Honest advice with no obligation to purchase our services.',
+    //   icon: content.benefit_5_icon || 'check',
+    // },
+    // {
+    //   title: content.benefit_6_title || 'Quick Turnaround',
+    //   description: content.benefit_6_description || 'Get insights and recommendations within 24-48 hours.',
+    //   icon: content.benefit_6_icon || 'clock',
+    // },
   ];
 
   const processSteps = [
@@ -109,12 +109,7 @@ export default function DynamicConsultationBenefitsSection({ content }: Consulta
       title: content.step_3_title || 'Analysis & Research',
       description: content.step_3_description || 'Our team analyzes your market, competitors, and opportunities.',
       number: '03',
-    },
-    {
-      title: content.step_4_title || 'Strategy Presentation',
-      description: content.step_4_description || 'Receive a custom strategy with actionable recommendations.',
-      number: '04',
-    },
+    }
   ];
 
   return (
@@ -171,23 +166,23 @@ export default function DynamicConsultationBenefitsSection({ content }: Consulta
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {processSteps.map((step, index) => (
               <div key={index} className="relative text-center">
                 {/* Connector Line */}
                 {index < processSteps.length - 1 && (
                   <div className="hidden lg:block absolute top-16 left-full w-full h-0.5 bg-blue-200 z-0"></div>
                 )}
-                
+
                 <div className="relative bg-white rounded-xl p-8 shadow-lg z-10">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full text-xl font-bold mb-6">
                     {step.number}
                   </div>
-                  
+
                   <h3 className="text-xl font-bold text-gray-900 mb-4">
                     {step.title}
                   </h3>
-                  
+
                   <p className="text-gray-600 leading-relaxed">
                     {step.description}
                   </p>

@@ -18,6 +18,7 @@ import adminRoutes from './routes/admin.js';
 import advertisementRoutes from './routes/advertisements.js';
 import htmlWidgetRoutes from './routes/htmlWidgets.js';
 import scriptsRoutes from './routes/scripts.js';
+import contactRoutes from './routes/contact.js';
 
 // Load environment variables
 dotenv.config();
@@ -64,6 +65,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/advertisements', advertisementRoutes);
 app.use('/api/html-widgets', htmlWidgetRoutes);
 app.use('/api/scripts', scriptsRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Serve static files for local uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));

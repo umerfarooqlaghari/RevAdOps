@@ -19,11 +19,17 @@ router.post('/', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, phone, message, source } = req.body;
+    const { name, firstName, lastName, email, phone, websiteUrl, message, source } = req.body;
+
+    // Keep backward-compatible `name` but prefer firstName+lastName when available
+    const composedName = name || [firstName, lastName].filter(Boolean).join(' ').trim() || 'Anonymous';
 
     const lead = await prisma.lead.create({
       data: {
-        name,
+        name: composedName,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        websiteUrl: websiteUrl || null,
         email,
         phone,
         message,
@@ -181,10 +187,10 @@ router.get('/admin/export', authenticateToken, async (req, res) => {
       orderBy: { createdAt: 'desc' }
     });
 
-    // Convert to CSV format
-    const csvHeader = 'Name,Email,Phone,Message,Source,Status,Created At\n';
+    // Convert to CSV format (include firstName, lastName, websiteUrl)
+    const csvHeader = 'First Name,Last Name,Name,Email,Website,Phone,Message,Source,Status,Created At\n';
     const csvData = leads.map(lead =>
-      `"${lead.name}","${lead.email}","${lead.phone || ''}","${(lead.message || '').replace(/"/g, '""')}","${lead.source || ''}","${lead.status}","${lead.createdAt.toISOString()}"`
+      `"${lead.firstName || ''}","${lead.lastName || ''}","${lead.name || ''}","${lead.email}","${lead.websiteUrl || ''}","${lead.phone || ''}","${(lead.message || '').replace(/"/g, '""')}","${lead.source || ''}","${lead.status}","${lead.createdAt.toISOString()}"`
     ).join('\n');
 
     const csv = csvHeader + csvData;

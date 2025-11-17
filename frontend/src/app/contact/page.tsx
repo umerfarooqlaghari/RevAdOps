@@ -1,18 +1,23 @@
 'use client';
 
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import DynamicContactHeroSection from '@/components/DynamicContactHeroSection';
 import DynamicContactInfoSection from '@/components/DynamicContactInfoSection';
+import DynamicContactFormSection from '@/components/DynamicContactFormSection';
 import { useState, useEffect } from 'react';
 
 interface ContactContent {
   hero: Record<string, string>;
   info: Record<string, string>;
+  form: Record<string, string>;
 }
 
 export default function ContactPage() {
   const [content, setContent] = useState<ContactContent>({
     hero: {},
-    info: {}
+    info: {},
+    form: {}
   });
   const [loading, setLoading] = useState(true);
 
@@ -25,7 +30,8 @@ export default function ContactPage() {
         // Extract contact-related content
         const contactContent = {
           hero: data.contact_hero || {},
-          info: data.contact_info || {}
+          info: data.contact_info || {},
+          form: data.contact_form || {}
         };
 
         setContent(contactContent);
@@ -60,8 +66,13 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen">
-      <DynamicContactHeroSection content={content.hero} />
-      <DynamicContactInfoSection content={content.info} />
+      <Header />
+      <main>
+        <DynamicContactHeroSection content={content.hero} />
+        <DynamicContactInfoSection content={content.info} />
+        <DynamicContactFormSection content={content.form} />
+      </main>
+      <Footer />
     </div>
   );
 }

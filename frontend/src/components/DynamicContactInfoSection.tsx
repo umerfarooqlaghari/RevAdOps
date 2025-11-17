@@ -59,9 +59,9 @@ export default function DynamicContactInfoSection({ content }: ContactInfoProps)
           )}
         </div>
 
-        {/* Office Cards - 3 in a row */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {offices.map((office, index) => (
+        {/* Office Cards - only show primary office (removed the other two) */}
+        <div className="grid md:grid-cols-1 lg:grid-cols-1 gap-8 max-w-2xl mx-auto">
+          {offices.slice(0, 1).map((office, index) => (
             <div key={index} className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200 hover:shadow-2xl hover:border-blue-300 transition-all duration-300">
               {/* Office Name with Icon */}
               <div className="text-center mb-6">

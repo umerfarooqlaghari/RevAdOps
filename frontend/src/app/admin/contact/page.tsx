@@ -73,16 +73,7 @@ export default function ContactAdmin() {
           { section: 'contact_info', key: 'office_1_phone', value: '+1 (555) 123-4567', type: 'text' },
           { section: 'contact_info', key: 'office_1_email', value: 'ny@revadops.com', type: 'text' },
           // Office 2
-          { section: 'contact_info', key: 'office_2_name', value: 'West Coast Office', type: 'text' },
-          { section: 'contact_info', key: 'office_2_address', value: '456 Innovation Ave, Floor 5\nSan Francisco, CA 94105', type: 'text' },
-          { section: 'contact_info', key: 'office_2_phone', value: '+1 (555) 987-6543', type: 'text' },
-          { section: 'contact_info', key: 'office_2_email', value: 'sf@revadops.com', type: 'text' },
-          // Office 3
-          { section: 'contact_info', key: 'office_3_name', value: 'European Office', type: 'text' },
-          { section: 'contact_info', key: 'office_3_address', value: '789 Tech Park, Building C\nLondon, UK EC1A 1BB', type: 'text' },
-          { section: 'contact_info', key: 'office_3_phone', value: '+44 20 1234 5678', type: 'text' },
-          { section: 'contact_info', key: 'office_3_email', value: 'london@revadops.com', type: 'text' },
-          // Support
+
           { section: 'contact_info', key: 'support_title', value: 'Need Help?', type: 'text' },
           { section: 'contact_info', key: 'support_description', value: 'Our support team is here to assist you with any questions or concerns.', type: 'text' },
           { section: 'contact_info', key: 'support_hours', value: 'Mon-Fri: 9AM-6PM EST', type: 'text' },
@@ -99,19 +90,16 @@ export default function ContactAdmin() {
           { section: 'contact_info', key: 'feature_4_description', value: 'Track record of successful partnerships.', type: 'text' }
         ],
         form: [
-          { section: 'contact_form', key: 'title', value: 'Send Us a Message', type: 'text' },
-          { section: 'contact_form', key: 'subtitle', value: 'Get in Touch', type: 'text' },
+          { section: 'contact_form', key: 'title', value: 'Get In Touch', type: 'text' },
           { section: 'contact_form', key: 'description', value: 'Fill out the form below and we\'ll get back to you as soon as possible.', type: 'text' },
-          { section: 'contact_form', key: 'form_title', value: 'Get in Touch', type: 'text' },
-          { section: 'contact_form', key: 'form_description', value: 'Tell us about your project and how we can help.', type: 'text' },
-          { section: 'contact_form', key: 'name_placeholder', value: 'Your full name', type: 'text' },
-          { section: 'contact_form', key: 'email_placeholder', value: 'your@email.com', type: 'text' },
-          { section: 'contact_form', key: 'phone_placeholder', value: '+1 (555) 123-4567', type: 'text' },
-          { section: 'contact_form', key: 'company_placeholder', value: 'Your company name', type: 'text' },
-          { section: 'contact_form', key: 'subject_placeholder', value: 'What can we help you with?', type: 'text' },
-          { section: 'contact_form', key: 'message_placeholder', value: 'Tell us more about your project...', type: 'text' },
-          { section: 'contact_form', key: 'submit_button_text', value: 'Send Message', type: 'text' },
-          { section: 'contact_form', key: 'success_message', value: 'Your message has been sent successfully. We\'ll get back to you within 24 hours.', type: 'text' }
+          { section: 'contact_form', key: 'first_name_placeholder', value: 'John', type: 'text' },
+          { section: 'contact_form', key: 'last_name_placeholder', value: 'Doe', type: 'text' },
+          { section: 'contact_form', key: 'email_placeholder', value: 'john@example.com', type: 'text' },
+          { section: 'contact_form', key: 'website_placeholder', value: 'https://example.com', type: 'text' },
+          { section: 'contact_form', key: 'submit_button_text', value: 'Submit', type: 'text' },
+          { section: 'contact_form', key: 'success_message', value: 'Your message has been sent successfully. We\'ll get back to you within 24 hours.', type: 'text' },
+          { section: 'contact_form', key: 'captcha_enabled', value: 'true', type: 'text' },
+          { section: 'contact_form', key: 'captcha_label', value: "I'm not a robot", type: 'text' }
         ]
       };
 
@@ -238,6 +226,7 @@ export default function ContactAdmin() {
   const sections = [
     { id: 'hero', name: 'Hero Section', icon: Type },
     { id: 'info', name: 'Contact Info', icon: Phone },
+    { id: 'form', name: 'Contact Form', icon: Mail }
   ];
 
   if (isLoading) {
@@ -317,7 +306,20 @@ export default function ContactAdmin() {
                   </label>
 
                   {item.type === 'text' ? (
-                    item.key.includes('description') || item.key.includes('address') || item.key.includes('message') ? (
+                    // Special-case captcha_enabled to show a toggle
+                    item.key === 'captcha_enabled' ? (
+                      <div className="flex items-center space-x-3">
+                        <label className="inline-flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={item.value === 'true'}
+                            onChange={(e) => handleContentChange(activeSection, item.key, e.target.checked ? 'true' : 'false')}
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                          />
+                        </label>
+                        <span className="text-sm text-gray-700">Enable captcha checkbox on contact form</span>
+                      </div>
+                    ) : item.key.includes('description') || item.key.includes('address') || item.key.includes('message') ? (
                       <textarea
                         value={item.value}
                         onChange={(e) => handleContentChange(activeSection, item.key, e.target.value)}

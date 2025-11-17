@@ -1,5 +1,7 @@
 'use client';
 
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import DynamicConsultationHeroSection from '@/components/DynamicConsultationHeroSection';
 import DynamicConsultationBenefitsSection from '@/components/DynamicConsultationBenefitsSection';
 import DynamicConsultationFormSection from '@/components/DynamicConsultationFormSection';
@@ -68,9 +70,13 @@ export default function ConsultationPage() {
 
   return (
     <div className="min-h-screen">
-      <DynamicConsultationHeroSection content={content.hero} />
-      <DynamicConsultationBenefitsSection content={content.benefits} />
-      <DynamicConsultationFormSection content={content.form} />
+      <Header />
+      <main>
+        <DynamicConsultationHeroSection content={content.hero} />
+        <DynamicConsultationBenefitsSection content={content.benefits} />
+        <DynamicConsultationFormSection content={content.form} />
+      </main>
+      <Footer />
     </div>
   );
 }
