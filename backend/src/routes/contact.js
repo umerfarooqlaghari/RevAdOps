@@ -26,7 +26,7 @@ router.post('/submit', [
         firstName: firstName || null,
         lastName: lastName || null,
         websiteUrl: website || null,
-        email,
+        email: email || null,
         phone: null,
         message: null,
         source: 'contact_form'
