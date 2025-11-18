@@ -92,6 +92,7 @@ export default function AdminLayout({
 
   const navigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: Home },
+    { name: 'Contact us Leads', href: '/admin/contact-leads', icon: Phone },
     { name: 'Homepage Content', href: '/admin/homepage', icon: FileText },
     { name: 'About Us Content', href: '/admin/about', icon: FileText },
     { name: 'Contact Us Content', href: '/admin/contact', icon: Phone },

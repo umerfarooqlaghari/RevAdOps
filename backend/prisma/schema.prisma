@@ -158,6 +158,9 @@ model Blog {
 model Lead {
   id        String   @id @default(cuid())
   name      String
+  firstName String?
+  lastName  String?
+  websiteUrl String?
   email     String
   phone     String?
   message   String?  @db.Text
