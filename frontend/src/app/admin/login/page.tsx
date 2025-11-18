@@ -145,13 +145,13 @@ export default function AdminLogin() {
         </form>
 
         {/* Default Credentials Info */}
-        <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+        {/* <div className="mt-8 p-4 bg-gray-50 rounded-lg">
           <h3 className="text-sm font-medium text-gray-700 mb-2">Default Admin Credentials:</h3>
           <div className="text-xs text-gray-600 space-y-1">
             <p><strong>Email:</strong> admin@RevAdOps.com</p>
             <p><strong>Password:</strong> RevAdOps</p>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

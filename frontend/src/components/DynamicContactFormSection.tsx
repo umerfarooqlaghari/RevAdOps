@@ -132,7 +132,7 @@ export default function DynamicContactFormSection({ content }: ContactFormProps)
                   value={formData.firstName}
                   onChange={handleInputChange}
                   placeholder={content.first_name_placeholder || 'John'}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-black"
                   required
                 />
               </div>
@@ -148,7 +148,7 @@ export default function DynamicContactFormSection({ content }: ContactFormProps)
                   value={formData.lastName}
                   onChange={handleInputChange}
                   placeholder={content.last_name_placeholder || 'Doe'}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-black"
                   required
                 />
               </div>
@@ -165,7 +165,7 @@ export default function DynamicContactFormSection({ content }: ContactFormProps)
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder={content.email_placeholder || 'john@example.com'}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-black"
                 required
               />
             </div>
@@ -181,7 +181,7 @@ export default function DynamicContactFormSection({ content }: ContactFormProps)
                 value={formData.website}
                 onChange={handleInputChange}
                 placeholder={content.website_placeholder || 'https://example.com'}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-black"
                 required
               />
             </div>
