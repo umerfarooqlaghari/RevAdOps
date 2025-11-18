@@ -44,7 +44,7 @@ export default function DynamicContactHeroSection({ content }: ContactHeroProps)
 
   return (
     
-    <section className="py-20 bg-blue-700">
+    <section className="py-20 bg-[#0e2a66]"> 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Side - Title & Description */}
@@ -53,7 +53,7 @@ export default function DynamicContactHeroSection({ content }: ContactHeroProps)
               {content?.title || 'Contact Us'}
             </h1>
             {content?.description && (
-              <p className="text-lg text-blue-100 leading-relaxed">
+              <p className="text-lg text-blue-200 leading-relaxed">
                 {content.description}
               </p>
             )}
